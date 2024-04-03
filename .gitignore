@@ -1,0 +1,154 @@
+# Directories #
+[Bb]in/
+[Oo]bj/
+[Ll]ogs/
+[Tt]est[Rr]esults/
+
+# Files #
+*.user
+*.userosscache
+*.suo
+*.userprefs
+*.nupkg
+*.dbmdl
+
+# VS Code #
+.vscode/
+
+# Rider #
+.idea/
+
+# Visual Studio #
+.vs/
+
+# Package Download Cache (since NuGet 3.x) #
+packages/
+
+# ReSharper - User-specific files #
+*ReSharper*/
+
+# User-specific files #
+*.rsuser
+*.sln.docstates
+
+# Generated XML doc files #
+*.xml
+
+# Nuget credential files #
+*.nuget.props
+*.nuget.targets
+
+# Microsoft Azure Build Artifacts #
+*.psess
+*.vsp
+*.vspx
+*.sap
+
+# MSTest test Results #
+*.trx
+*.vsmdi
+*.Testsettings
+
+# NUNIT #
+*.VisualState.xml
+TestResult.xml
+
+# Build Results of an ATL Project #
+[Dd]ebugPS/
+[Rr]eleasePS/
+dlldata.c
+
+# BenchmarkDotNet Artifacts #
+BenchmarkDotNet.Artifacts/
+
+# .NET Core #
+project.lock.json
+project.fragment.lock.json
+artifacts/
+
+# StyleCop #
+StyleCopReport.xml
+
+# Files built by Visual Studio #
+*_i.c
+*_p.c
+*_h.h
+*.ilk
+*.meta
+*.obj
+*.iobj
+*.pch
+*.pdb
+*.ipdb
+*.pgc
+*.pgd
+*.rsp
+*.sbr
+*.tlb
+*.tli
+*.tlh
+*.tmp
+*.tmp_proj
+*.log
+*.vspscc
+*.vssscc
+*.scc
+
+# Chutzpah Test files #
+_Chutzpah*
+
+# Visual C++ cache files #
+ipch/
+*.aps
+*.ncb
+*.opensdf
+*.sdf
+*.cachefile
+
+# Visual Studio profiler #
+*.psess
+*.vsp
+*.vspx
+*.sap
+
+# Visual Studio Trace Files #
+*.e2e
+
+# TFS 2012 Local Workspace #
+$tf/
+
+# Guidance Automation Toolkit #
+*.gpState
+
+# NuGet Packages Directory #
+## TODO: Uncomment the next line if you want to ignore the packages directory
+#packages/
+
+# Windows image file caches #
+Thumbs.db
+ehthumbs.db
+
+# Folder config file #
+Desktop.ini
+
+# Recycle Bin used on file shares #
+$RECYCLE.BIN/
+
+# Mac desktop service store files #
+.DS_Store
+
+# Visual Studio Code - Workspace settings #
+.vscode/
+
+# User-specific files #
+*.rsuser
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+# Mono Auto Generated Files #
+mono_crash.*
+
+# ASP.NET Scaffolding #
+ScaffoldingReadMe.txt
