@@ -31,13 +31,13 @@ jobs:
         run: dotnet build --configuration Release
 
       - name: dotnet publish
-      - run: dotnet publish MoodTrackerAPI/MoodTrackerAPI.csproj -c Release -o ./myapp
+        run: dotnet publish MoodTrackerAPI/MoodTrackerAPI.csproj -c Release -o ./myapp
 
       - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v3
         with:
           name: .net-app
-          path: ./myapp
+          path: ${{env.DOTNET_ROOT}}/MoodTrackerAPI
 
   deploy:
     runs-on: ubuntu-latest
