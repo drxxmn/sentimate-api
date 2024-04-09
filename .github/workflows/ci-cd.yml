@@ -11,16 +11,8 @@ on:
       - 'MoodTrackerAPI/**'
   workflow_dispatch:
 
-permissions:
-  contents: read
-  packages: write
-  id-token: write
-
-env:
-  IMAGE_NAME: ghcr.io/${{ github.repository }}/sentimate-api
-
 jobs:
-  build-and-push:
+  build:
     runs-on: ubuntu-latest
     
     steps:
@@ -43,29 +35,14 @@ jobs:
       - name: Publish
         run: dotnet publish MoodTrackerAPI/MoodTrackerAPI.csproj -c Release -o ./publish --no-restore
 
-      - name: Log in to GitHub Container Registry
+      - name: Build Docker image
+        run: docker build -t drxxmn/sentimate-api:latest -f MoodTrackerAPI/Dockerfile .
+
+      - name: Log in to DockerHub
         uses: docker/login-action@v1
         with:
-          registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ secrets.GHCR_TOKEN }}
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_PASSWORD }}
 
-      - name: Build Docker image
-        run: docker build -t ${{ env.IMAGE_NAME }}:latest -f MoodTrackerAPI/Dockerfile .
-
-      - name: Push Docker image to GHCR
-        run: docker push ${{ env.IMAGE_NAME }}:latest
-
-      - name: Login to Azure
-        uses: azure/login@v2
-        with:
-          client-id: ${{ secrets.AZURE_CLIENT_ID }}
-          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
-          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
-          client-secret: ${{ secrets.AZURE_CLIENT_SECRET }}
-          
-      - name: Deploy to Azure Web App
-        uses: azure/webapps-deploy@v2
-        with:
-          app-name: 'sentimate-api'
-          images: ${{ env.IMAGE_NAME }}:latest
+      - name: Push Docker image to DockerHub
+        run: docker push drxxmn/sentimate-api:latest
