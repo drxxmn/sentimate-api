@@ -10,8 +10,16 @@ on:
     paths:
       - 'MoodTrackerAPI/**'
 
+permissions:
+  contents: read
+  packages: write
+  id-token: write
+
+env:
+  IMAGE_NAME: ghcr.io/${{ github.repository }}/sentimate-api
+
 jobs:
-  build:
+  build-and-push:
     runs-on: ubuntu-latest
     
     steps:
@@ -34,14 +42,26 @@ jobs:
       - name: Publish
         run: dotnet publish MoodTrackerAPI/MoodTrackerAPI.csproj -c Release -o ./publish --no-restore
 
-      - name: Build Docker image
-        run: docker build -t drxxmn/sentimate-api:latest -f MoodTrackerAPI/Dockerfile .
-
-      - name: Log in to DockerHub
+      - name: Log in to GitHub Container Registry
         uses: docker/login-action@v1
         with:
-          username: ${{ secrets.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_PASSWORD }}
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Push Docker image to DockerHub
-        run: docker push drxxmn/sentimate-api:latest
+      - name: Build Docker image
+        run: docker build -t ${{ env.IMAGE_NAME }}:latest -f MoodTrackerAPI/Dockerfile .
+
+      - name: Push Docker image to GHCR
+        run: docker push ${{ env.IMAGE_NAME }}:latest
+
+      - name: Login to Azure
+        uses: azure/login@v1
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      - name: Deploy to Azure Web App
+        uses: azure/webapps-deploy@v2
+        with:
+          app-name: 'sentimate-api'
+          images: ${{ env.IMAGE_NAME }}:latest
