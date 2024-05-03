@@ -34,8 +34,10 @@ namespace MoodTrackingService.Controllers
         }
 
         [HttpPost]
-        public async Task<ActionResult<MoodEntry>> Post([FromBody] MoodEntry entry)
+        public async Task<IActionResult> Post([FromBody] MoodEntry entry)
         {
+            ModelState.Remove("Id"); // Ensure this line is here to avoid validation on Id
+
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
@@ -43,7 +45,7 @@ namespace MoodTrackingService.Controllers
 
             try
             {
-                entry.Timestamp = DateTime.UtcNow;
+                entry.Timestamp = DateTime.UtcNow; // Ensure timestamp is set
                 await _context.MoodEntries.InsertOneAsync(entry);
                 return CreatedAtAction(nameof(Get), new { id = entry.Id }, entry);
             }
@@ -52,5 +54,7 @@ namespace MoodTrackingService.Controllers
                 return StatusCode(500, "Internal server error: " + ex.Message);
             }
         }
+
+
     }
 }
