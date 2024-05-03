@@ -1,7 +1,8 @@
 using Microsoft.AspNetCore.Mvc;
 using MoodTrackingService.Data;
 using MoodTrackingService.Models;
-using MongoDB.Driver;  // Ensure this is included
+using MoodTrackingService.DTOs;
+using MongoDB.Driver;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -20,41 +21,43 @@ namespace MoodTrackingService.Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<MoodEntry>>> Get()
+        public async Task<ActionResult<IEnumerable<MoodEntryResponseDto>>> Get()
         {
-            try
+            var entries = await _context.MoodEntries.Find(_ => true).ToListAsync();
+            var responseDtos = entries.ConvertAll(entry => new MoodEntryResponseDto
             {
-                var entries = await _context.MoodEntries.Find(_ => true).ToListAsync();
-                return Ok(entries);
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, "Internal server error: " + ex.Message);
-            }
+                Id = entry.Id,
+                Mood = entry.Mood,
+                Timestamp = entry.Timestamp,
+                UserId = entry.UserId
+            });
+            return Ok(responseDtos);
         }
 
         [HttpPost]
-        public async Task<IActionResult> Post([FromBody] MoodEntry entry)
+        public async Task<IActionResult> Post([FromBody] MoodEntryCreateDto dto)
         {
-            ModelState.Remove("Id"); // Ensure this line is here to avoid validation on Id
-
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
 
-            try
+            var entry = new MoodEntry
             {
-                entry.Timestamp = DateTime.UtcNow; // Ensure timestamp is set
-                await _context.MoodEntries.InsertOneAsync(entry);
-                return CreatedAtAction(nameof(Get), new { id = entry.Id }, entry);
-            }
-            catch (Exception ex)
+                Mood = dto.Mood,
+                UserId = dto.UserId,
+                Timestamp = DateTime.UtcNow
+            };
+
+            await _context.MoodEntries.InsertOneAsync(entry);
+            var responseDto = new MoodEntryResponseDto
             {
-                return StatusCode(500, "Internal server error: " + ex.Message);
-            }
+                Id = entry.Id,
+                Mood = entry.Mood,
+                Timestamp = entry.Timestamp,
+                UserId = entry.UserId
+            };
+            return CreatedAtAction(nameof(Get), new { id = entry.Id }, responseDto);
         }
-
-
     }
 }
