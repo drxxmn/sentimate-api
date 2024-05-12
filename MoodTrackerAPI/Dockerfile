@@ -1,19 +1,22 @@
-# Define the base image for the SDK to build the project
+# Use the official image as a parent image
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
+
+# Set the working directory
 WORKDIR /src
 
-# Copy csproj file and restore any dependencies (via NuGet)
-COPY MoodTrackerAPI.csproj .
-RUN dotnet restore
+# Copy the project file into the container at /src
+COPY ["MoodTrackerAPI.csproj", "./"]
 
-# Copy the remaining source files from your project into the Docker image
+# Restore dependencies
+RUN dotnet restore "MoodTrackerAPI.csproj"
+
+# Copy the rest of your app's source code from your host to your image filesystem.
 COPY . .
 
-# Publish the application to the directory for running the app
-RUN dotnet publish -c Release -o /app/publish
+# Build the application
+RUN dotnet build "MoodTrackerAPI.csproj" -c Release -o /app/build
 
-# Define the base image for the runtime
 FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS base
 WORKDIR /app
-COPY --from=build /app/publish .
+COPY --from=build /app/build .
 ENTRYPOINT ["dotnet", "MoodTrackerAPI.dll"]
