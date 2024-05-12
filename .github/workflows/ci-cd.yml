@@ -1,22 +1,42 @@
-name: .NET CI/CD Pipeline
+name: .NET Build and Push to GHCR
 
 on:
   push:
-    branches: [main]
+    branches:
+      - main
     paths:
       - 'MoodTrackerAPI/**'
   pull_request:
-    branches: [main]
+    branches:
+      - main
     paths:
       - 'MoodTrackerAPI/**'
   workflow_dispatch:
 
 jobs:
-  build-and-push:
+  build_and_push:
     runs-on: ubuntu-latest
+    
     steps:
-      - name: Check out code
+      - name: Checkout code
         uses: actions/checkout@v2
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v1
+        with:
+          dotnet-version: '8.0.x'
+
+      - name: Restore dependencies
+        run: dotnet restore MoodTrackerAPI/MoodTrackerAPI.csproj
+
+      - name: Build
+        run: dotnet build MoodTrackerAPI/MoodTrackerAPI.csproj --configuration Release --no-restore
+
+      - name: Test
+        run: dotnet test MoodTrackerAPI/MoodTrackerAPI.csproj --no-restore --verbosity normal
+
+      - name: Publish
+        run: dotnet publish MoodTrackerAPI/MoodTrackerAPI.csproj -c Release -o ./publish --no-restore
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v1
@@ -28,14 +48,11 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Build and push Docker image
+      - name: Build and push Docker image to GHCR
         uses: docker/build-push-action@v2
         with:
           context: ./MoodTrackerAPI
           file: ./MoodTrackerAPI/Dockerfile
-          tags: ghcr.io/drxxmn/sentimate-api:latest
+          tags: ghcr.io/${{ github.repository_owner }}/sentimate-api:latest
           push: true
 
-env:
-  REGISTRY: ghcr.io
-  IMAGE_NAME: ${{ github.repository }}
