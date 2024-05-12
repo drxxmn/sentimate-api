@@ -1,0 +1,24 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: moodtrackerapi
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: moodtrackerapi
+  template:
+    metadata:
+      labels:
+        app: moodtrackerapi
+    spec:
+      containers:
+        - name: moodtrackerapi
+          image: moodtrackerapi:latest
+          env:
+            - name: MongoDB__ConnectionString
+              value: "mongodb://admin:secret@mongodb:27017/?authSource=admin"
+            - name: MongoDB__DatabaseName
+              value: "MoodTrackerDev"
+          ports:
+            - containerPort: 80
