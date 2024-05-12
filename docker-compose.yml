@@ -1,25 +1,27 @@
 version: '3.8'
 services:
-  moodtrackerapi:
-    build:
-      context: .  # This points to the root of the project where the Dockerfile is located.
-      dockerfile: Dockerfile  # Dockerfile is in the root as per your project structure.
-    environment:
-      ASPNETCORE_ENVIRONMENT: Development
-    ports:
-      - "8000:80"  # This will make your API accessible on http://localhost:8000
-    depends_on:
-      - mongodb
-
   mongodb:
     image: mongo:latest
     environment:
-      MONGO_INITDB_ROOT_USERNAME: rootuser
-      MONGO_INITDB_ROOT_PASSWORD: rootpass
+      MONGO_INITDB_ROOT_USERNAME: admin
+      MONGO_INITDB_ROOT_PASSWORD: secret
     ports:
-      - "27017:27017"  # Expose MongoDB on the default port.
+      - "27017:27017"
     volumes:
-      - mongodb_data:/data/db  # Persist MongoDB data on a named volume.
+      - mongodb_data:/data/db
+
+  moodtrackerapi:
+    build:
+      context: .
+      dockerfile: MoodTrackerAPI/Dockerfile
+    depends_on:
+      - mongodb
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+      MongoDB__ConnectionString: "mongodb://admin:secret@mongodb:27017/?authSource=admin"
+      MongoDB__DatabaseName: "MoodTrackerDev"
+    ports:
+      - "8000:8080"
 
 volumes:
-  mongodb_data:  # Defines the named volume used by MongoDB.
+  mongodb_data:

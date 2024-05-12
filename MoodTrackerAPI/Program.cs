@@ -1,36 +1,40 @@
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Configuration;
 using MoodTrackingService.Data;
-using Microsoft.Extensions.Configuration; // Ensure this is included for IConfiguration
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
-builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
-
-// Register MongoDbContext
-// Ensure you're injecting the concrete class, not the interface, if you're not using an interface
+// Set up MongoDB context
 builder.Services.AddScoped<MongoDbContext>(provider =>
 {
-    // Obtain the configuration instance to access app settings
     var configuration = provider.GetRequiredService<IConfiguration>();
     return new MongoDbContext(configuration);
 });
 
 builder.Services.AddControllers();
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
+// Configure the HTTP request pipeline
 if (app.Environment.IsDevelopment())
 {
+    app.UseDeveloperExceptionPage();
     app.UseSwagger();
     app.UseSwaggerUI();
 }
+else
+{
+    app.UseExceptionHandler("/Home/Error");
+    app.UseHsts();
+}
 
 app.UseHttpsRedirection();
+app.UseStaticFiles();
+app.UseRouting();
 app.UseAuthorization();
 app.MapControllers();
 app.Run();
