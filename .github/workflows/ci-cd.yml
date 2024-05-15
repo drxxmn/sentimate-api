@@ -9,6 +9,8 @@ on:
     branches: [main]
     paths:
       - 'MoodTrackerAPI/**'
+
+  
   workflow_dispatch:
 
 jobs:
