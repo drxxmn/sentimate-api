@@ -26,7 +26,7 @@ jobs:
         env:
           SSHPASS: ${{ secrets.SSH_PASSWORD }}
         run: |         
-          sshpass -e scp -o StrictHostKeyChecking=no -r ./deployments/* ${{ secrets.USERNAME }}@${{ secrets.SERVER_IP }}:/home/${{ secrets.USERNAME }}/k8s-files
+          sshpass -e scp -o StrictHostKeyChecking=no -r ./deployments/staging/* ${{ secrets.USERNAME }}@${{ secrets.SERVER_IP }}:/home/${{ secrets.USERNAME }}/k
         
       - name: Apply Kubernetes configuration
         env:
