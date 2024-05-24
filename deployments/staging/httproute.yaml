@@ -4,7 +4,7 @@ metadata:
   name: moodtracker-route
 spec:
   parentRefs:
-    - name: eg
+    - name: envoy-gateway
   hostnames:
     - "moodtrackerapi.local"
   rules:
