@@ -5,8 +5,6 @@ metadata:
 spec:
   parentRefs:
     - name: envoy-gateway
-  hostnames:
-    - "moodtrackerapi.local"
   rules:
     - matches:
         - path:
