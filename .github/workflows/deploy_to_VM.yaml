@@ -1,0 +1,35 @@
+name: Deploy to VM
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  connect_to_vpn_and_deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Install OpenConnect
+        run: |
+          sudo sed -i 's/^deb/#deb/' /etc/apt/sources.list.d/microsoft-prod.list
+          sudo apt-get update
+          sudo apt-get install -y openconnect
+
+      - name: Connect to VPN
+        run: |
+          printf '${{ secrets.NETLAB_GROUP }}\n${{ secrets.NETLAB_USERNAME }}\n${{ secrets.NETLAB_PASSWORD }}\n' | sudo openconnect vpnnetlab.fhict.nl -b
+
+      - name: Transfer Kubernetes files
+        env:
+          SSHPASS: ${{ secrets.SSH_PASSWORD }}
+        run: |         
+          sshpass -e scp -o StrictHostKeyChecking=no -r ./deployments/* ${{ secrets.USERNAME }}@${{ secrets.SERVER_IP }}:/home/${{ secrets.USERNAME }}/k8s-files
+        
+      - name: Apply Kubernetes configuration
+        env:
+          SSHPASS: ${{ secrets.SSH_PASSWORD }}
+        run: |  
+            sshpass -e ssh -o StrictHostKeyChecking=no ${{ secrets.USERNAME }}@${{ secrets.SERVER_IP }} "microk8s kubectl apply -f /home/${{ secrets.USERNAME }}/k8s-files" 
