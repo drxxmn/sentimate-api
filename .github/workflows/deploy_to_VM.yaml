@@ -32,4 +32,4 @@ jobs:
         env:
           SSHPASS: ${{ secrets.SSH_PASSWORD }}
         run: |  
-            sshpass -e ssh -o StrictHostKeyChecking=no ${{ secrets.USERNAME }}@${{ secrets.SERVER_IP }} "cd /home/${{ secrets.USERNAME }}/deployment.sh" 
+            sshpass -e ssh -o StrictHostKeyChecking=no ${{ secrets.USERNAME }}@${{ secrets.SERVER_IP }} "cd /home/${{ secrets.USERNAME }}./deployment.sh" 
