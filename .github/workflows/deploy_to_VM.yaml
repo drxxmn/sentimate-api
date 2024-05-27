@@ -30,12 +30,11 @@ jobs:
         env:
           SSHPASS: ${{ secrets.SSH_PASSWORD }}
         run: |
-          sshpass -e ssh -o StrictHostKeyChecking=no student@192.168.144.135 "mkdir -p /home/student/k8s-files"
-          sshpass -e scp -o StrictHostKeyChecking=no -r ./deployments/staging/* student@192.168.144.135:/home/student/k8s-files
+          ssh -e ssh -o StrictHostKeyChecking=no student@192.168.144.135 "mkdir -p /home/student/k8s-files"
+          ssh -e scp -o StrictHostKeyChecking=no -r ./deployments/staging/* student@192.168.144.135:/home/student/k8s-files
 
       - name: Run Deployment Script
         env:
           SSHPASS: ${{ secrets.SSH_PASSWORD }}
-          SUDO_PASSWORD: ${{ secrets.SSH_PASSWORD_STUDENT }}
         run: |
-          sshpass -e ssh -o StrictHostKeyChecking=no student@192.168.144.135 "export SUDO_PASSWORD='${{ secrets.SUDO_PASSWORD }}' && bash /home/student/deployment.sh"
+          ssh -e ssh -o StrictHostKeyChecking=no student@192.168.144.135 "bash /home/student/deployment.sh"
