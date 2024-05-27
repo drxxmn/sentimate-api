@@ -1,5 +1,9 @@
-name: Run Staging tests
-on: push
+name: Run Staging Tests
+
+on:
+  push:
+    branches:
+      - main
 
 jobs:
   Setup:
@@ -7,12 +11,13 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+
       - name: Install AnyConnect VPN & Login
         run: |
           sudo apt-get update
           sudo /sbin/modprobe tun
-          sudo apt-get install openconnect
-          printf 'Netlab Fontys ICT\n${{secrets.NETLAB_USERNAME}}\n${{secrets.NETLAB_PASSWORD}}\n' | sudo openconnect vpnnetlab.fhict.nl -b
+          sudo apt-get install -y openconnect
+          printf 'Netlab Fontys ICT\n${{ secrets.NETLAB_USERNAME }}\n${{ secrets.NETLAB_PASSWORD }}\n' | sudo openconnect vpnnetlab.fhict.nl -b
 
       - name: Setup SSH Key
         run: |
@@ -20,6 +25,12 @@ jobs:
           echo "${{ secrets.SSH_KEY }}" > ~/.ssh/id_rsa
           chmod 600 ~/.ssh/id_rsa
           ssh-keyscan 192.168.144.135 >> ~/.ssh/known_hosts
-      - name: Run Load Tests
+
+      - name: Transfer Project Files
         run: |
-          ssh -o StrictHostKeyChecking=no student@192.168.144.135 "./execute-load-tests.sh"
+          sshpass -e ssh -o StrictHostKeyChecking=no student@192.168.144.135 "mkdir -p /home/student/k8s-files"
+          sshpass -e scp -o StrictHostKeyChecking=no -r ./deployments/staging/* student@192.168.144.135:/home/student/k8s-files
+
+      - name: Run Deployment Script
+        run: |
+          sshpass -e ssh -o StrictHostKeyChecking=no student@192.168.144.135 "bash /home/student/k8s-files/deployment.sh"
