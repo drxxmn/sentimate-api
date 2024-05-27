@@ -1,35 +1,25 @@
-name: Deploy to VM
-
-on:
-  push:
-    branches:
-      - main
+name: Run Staging tests
+on: push
 
 jobs:
-  connect_to_vpn_and_deploy:
+  Setup:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v3
-
-      - name: Install OpenConnect
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Install AnyConnect VPN & Login
         run: |
-          sudo sed -i 's/^deb/#deb/' /etc/apt/sources.list.d/microsoft-prod.list
           sudo apt-get update
-          sudo apt-get install -y openconnect
+          sudo /sbin/modprobe tun
+          sudo apt-get install openconnect
+          printf 'Netlab Fontys ICT\n${{secrets.NETLAB_USERNAME}}\n${{secrets.NETLAB_PASSWORD}}\n' | sudo openconnect vpnnetlab.fhict.nl -b
 
-      - name: Connect to VPN
+      - name: Setup SSH Key
         run: |
-          printf '${{ secrets.NETLAB_GROUP }}\n${{ secrets.NETLAB_USERNAME }}\n${{ secrets.NETLAB_PASSWORD }}\n' | sudo openconnect vpnnetlab.fhict.nl -b
-
-      - name: Transfer Kubernetes files
-        env:
-          SSHPASS: ${{ secrets.SSH_PASSWORD }}
-        run: |         
-          sshpass -e scp -o StrictHostKeyChecking=no -r ./deployments/staging/* ${{ secrets.USERNAME }}@${{ secrets.SERVER_IP }}:/home/${{ secrets.USERNAME }}/k8s-files
-        
-      - name: Apply Kubernetes configuration
-        env:
-          SSHPASS: ${{ secrets.SSH_PASSWORD }}
-        run: |  
-            sshpass -e ssh -o StrictHostKeyChecking=no ${{ secrets.USERNAME }}@${{ secrets.SERVER_IP }} "microk8s kubectl apply -f /home/${{ secrets.USERNAME }}/k8s-files" 
+          mkdir -p ~/.ssh
+          echo "${{ secrets.SSH_KEY }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          ssh-keyscan 192.168.144.135 >> ~/.ssh/known_hosts
+      - name: Run Load Tests
+        run: |
+          ssh -o StrictHostKeyChecking=no student@192.168.144.135 "./execute-load-tests.sh"
