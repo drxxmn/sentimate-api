@@ -36,5 +36,6 @@ jobs:
       - name: Run Deployment Script
         env:
           SSHPASS: ${{ secrets.SSH_PASSWORD }}
+          SUDO_PASSWORD: ${{ secrets.SSH_PASSWORD_STUDENT }}
         run: |
-          sshpass -e ssh -o StrictHostKeyChecking=no student@192.168.144.135 "bash /home/student/deployment.sh"
+          sshpass -e ssh -o StrictHostKeyChecking=no student@192.168.144.135 "export SUDO_PASSWORD='${{ secrets.SUDO_PASSWORD }}' && bash /home/student/deployment.sh"
