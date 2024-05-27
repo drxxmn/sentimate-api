@@ -37,4 +37,4 @@ jobs:
         env:
           SSHPASS: ${{ secrets.SSH_PASSWORD }}
         run: |
-          sshpass -e ssh -o StrictHostKeyChecking=no student@192.168.144.135 "bash /home/student/k8s-files/deployment.sh"
+          sshpass -e ssh -o StrictHostKeyChecking=no student@192.168.144.135 "bash /home/student/deployment.sh"
