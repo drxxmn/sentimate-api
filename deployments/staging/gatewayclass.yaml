@@ -4,13 +4,3 @@ metadata:
   name: envoy-gateway
 spec:
   controllerName: gateway.envoyproxy.io/gatewayclass-controller
-
-network:
-  version: 2
-  ethernets:
-    eth0:
-      dhcp4: true
-      nameservers:
-        addresses:
-         - 8.8.8.8
-          - 8.8.4.4
