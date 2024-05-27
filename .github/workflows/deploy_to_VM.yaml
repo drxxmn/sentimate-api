@@ -35,6 +35,6 @@ jobs:
 
       - name: Run Deployment Script
         env:
-          SSHPASS: ${{ secrets.SSH_PASSWORD }}
+          SSHPASS: ${{ secrets.SSH_PASSWORD_STUDENT }}
         run: |
-          ssh -o StrictHostKeyChecking=no student@192.168.144.135 "bash /home/student/deployment.sh"
+          ssh -o StrictHostKeyChecking=no student@192.168.144.135 "echo $SSHPASS | sudo -S bash /home/student/deployment.sh"
