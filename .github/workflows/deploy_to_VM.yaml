@@ -27,10 +27,14 @@ jobs:
           ssh-keyscan 192.168.144.135 >> ~/.ssh/known_hosts
 
       - name: Transfer Project Files
+        env:
+          SSHPASS: ${{ secrets.SSH_PASSWORD }}
         run: |
           sshpass -e ssh -o StrictHostKeyChecking=no student@192.168.144.135 "mkdir -p /home/student/k8s-files"
           sshpass -e scp -o StrictHostKeyChecking=no -r ./deployments/staging/* student@192.168.144.135:/home/student/k8s-files
 
       - name: Run Deployment Script
+        env:
+          SSHPASS: ${{ secrets.SSH_PASSWORD }}
         run: |
           sshpass -e ssh -o StrictHostKeyChecking=no student@192.168.144.135 "bash /home/student/k8s-files/deployment.sh"
