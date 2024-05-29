@@ -59,5 +59,18 @@ namespace MoodTrackingService.Controllers
             };
             return CreatedAtAction(nameof(Get), new { id = entry.Id }, responseDto);
         }
+
+        // New Delete method
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> Delete(string id)
+        {
+            var result = await _context.MoodEntries.DeleteOneAsync(entry => entry.Id == id);
+            if (result.DeletedCount == 0)
+            {
+                return NotFound();
+            }
+
+            return NoContent();
+        }
     }
 }
