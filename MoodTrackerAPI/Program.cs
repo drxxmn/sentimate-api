@@ -2,6 +2,10 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Configuration;
+using OpenTelemetry;
+using OpenTelemetry.Metrics;
+using OpenTelemetry.Trace;
+using Grafana.OpenTelemetry;
 using MoodTrackingService.Data;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -12,6 +16,22 @@ builder.Services.AddScoped<MongoDbContext>(provider =>
     var configuration = provider.GetRequiredService<IConfiguration>();
     return new MongoDbContext(configuration);
 });
+
+// grafana
+using var tracerProvider = Sdk.CreateTracerProviderBuilder()
+    .UseGrafana()
+    .Build();
+using var meterProvider = Sdk.CreateMeterProviderBuilder()
+    .UseGrafana()
+    .Build();
+using var loggerFactory = LoggerFactory.Create(builder =>
+{
+    builder.AddOpenTelemetry(logging =>
+    {
+        logging.UseGrafana();
+    });
+});
+// grafana end 
 
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
