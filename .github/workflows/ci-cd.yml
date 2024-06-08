@@ -33,8 +33,8 @@ jobs:
       - name: Build and push Docker image
         uses: docker/build-push-action@v2
         with:
-          context: ./MoodTrackerAPI
-          file: ./MoodTrackerAPI/Dockerfile
+          context: ./Services/MoodTrackerAPI
+          file: ./Services/MoodTrackerAPI/Dockerfile
           tags: ghcr.io/drxxmn/sentimate-api:latest
           push: true
 
