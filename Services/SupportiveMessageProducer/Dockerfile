@@ -1,21 +1,28 @@
-# Use the .NET SDK image as a build environment
-FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
-WORKDIR /src
+# syntax=docker/dockerfile:1
+FROM --platform=$BUILDPLATFORM mcr.microsoft.com/dotnet/sdk:8.0-alpine AS build
 
-# Copy the project file and restore dependencies
-COPY ["SupportiveMessageProducer/SupportiveMessageProducer.csproj", "SupportiveMessageProducer/"]
-RUN dotnet restore "SupportiveMessageProducer/SupportiveMessageProducer.csproj"
+# Copy the entire source code into the container
+COPY . /source
 
-# Copy the rest of the source code and build the application
-COPY ["SupportiveMessageProducer/", "SupportiveMessageProducer/"]
-WORKDIR /src/SupportiveMessageProducer
-RUN dotnet build "SupportiveMessageProducer.csproj" -c Release -o /app/build
+# Set the working directory
+WORKDIR /source
 
-# Publish the application
-RUN dotnet publish "SupportiveMessageProducer.csproj" -c Release -o /app/publish
+# Argument for the target architecture
+ARG TARGETARCH
 
-# Use the ASP.NET Core runtime image
-FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS base
+# Restore dependencies and build the project
+RUN --mount=type=cache,id=nuget,target=/root/.nuget/packages \
+    dotnet publish -a ${TARGETARCH/amd64/x64} --use-current-runtime --self-contained false -o /app
+
+# Final stage: use the ASP.NET runtime image
+FROM mcr.microsoft.com/dotnet/aspnet:8.0-alpine AS final
 WORKDIR /app
-COPY --from=build /app/publish .
-ENTRYPOINT ["dotnet", "SupportiveMessageProducer.dll"]
+
+# Copy the built application from the previous stage
+COPY --from=build /app .
+
+# Optionally set a user (uncomment and set appropriate user if needed)
+# USER $APP_UID
+
+# Set the entry point for the application
+ENTRYPOINT ["dotnet", "SupportiveMessagesProducer.dll"]
