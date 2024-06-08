@@ -2,15 +2,19 @@
 FROM --platform=$BUILDPLATFORM mcr.microsoft.com/dotnet/sdk:8.0-alpine AS build
 
 # Set the working directory to the project folder
-WORKDIR /source/SupportiveMessageProducer
+WORKDIR /source
+
+# Copy the .csproj file and restore dependencies
+COPY SupportiveMessageProducer/*.csproj ./
+RUN dotnet restore
 
 # Copy the entire source code into the container
-COPY . .
+COPY SupportiveMessageProducer/. .
 
 # Argument for the target architecture
 ARG TARGETARCH
 
-# Restore dependencies and build the project
+# Build the project
 RUN --mount=type=cache,id=nuget,target=/root/.nuget/packages \
     dotnet publish -c Release -a ${TARGETARCH/amd64/x64} --use-current-runtime --self-contained false -o /app
 
