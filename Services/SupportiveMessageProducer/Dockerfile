@@ -1,11 +1,11 @@
 # syntax=docker/dockerfile:1
 FROM --platform=$BUILDPLATFORM mcr.microsoft.com/dotnet/sdk:8.0-alpine AS build
 
-# Copy the entire source code into the container
-COPY . /source
-
-# Set the working directory
+# Set the working directory to the project folder
 WORKDIR /source/SupportiveMessageProducer
+
+# Copy the entire source code into the container
+COPY . .
 
 # Argument for the target architecture
 ARG TARGETARCH
