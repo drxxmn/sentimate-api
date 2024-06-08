@@ -4,15 +4,15 @@ on:
   push:
     branches: [main]
     paths:
-      - 'Services/MoodTrackerAPI/**'
-      - 'Services/SupportiveMessageProducer/**'
-      - 'Services/SupportiveMessageConsumer/**'
+      - 'services/MoodTrackerAPI/**'
+      - 'services/SupportiveMessageProducer/**'
+      - 'services/SupportiveMessageConsumer/**'
   pull_request:
     branches: [main]
     paths:
-      - 'Services/MoodTrackerAPI/**'
-      - 'Services/SupportiveMessageProducer/**'
-      - 'Services/SupportiveMessageConsumer/**'
+      - 'services/MoodTrackerAPI/**'
+      - 'services/SupportiveMessageProducer/**'
+      - 'services/SupportiveMessageConsumer/**'
   workflow_dispatch:
 
 jobs:
@@ -21,17 +21,17 @@ jobs:
     strategy:
       matrix:
         include:
-          - dockerfile: ./Services/MoodTrackerAPI/Dockerfile
+          - dockerfile: ./services/MoodTrackerAPI/Dockerfile
             image: ghcr.io/drxxmn/sentimate-api
-            context: ./Services/MoodTrackerAPI
+            context: .
             service-name: MoodTrackerAPI
-          - dockerfile: ./Services/SupportiveMessageProducer/Dockerfile
+          - dockerfile: ./services/SupportiveMessageProducer/Dockerfile
             image: ghcr.io/drxxmn/supportive-message-producer
-            context: ./Services/SupportiveMessageProducer
+            context: .
             service-name: SupportiveMessageProducer
-          - dockerfile: ./Services/SupportiveMessageConsumer/Dockerfile
+          - dockerfile: ./services/SupportiveMessageConsumer/Dockerfile
             image: ghcr.io/drxxmn/supportive-message-consumer
-            context: ./Services/SupportiveMessageConsumer
+            context: .
             service-name: SupportiveMessageConsumer
 
     name: Build and push container ${{ matrix.service-name }}
