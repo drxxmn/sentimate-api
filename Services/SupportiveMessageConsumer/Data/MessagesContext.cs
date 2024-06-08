@@ -10,5 +10,5 @@ public class MessagesContext : DbContext
 public class SupportiveMessage
 {
     public int Id { get; set; }
-    public string Message { get; set; }
+    public string Message { get; set; } = string.Empty; // Initialize as empty string
 }
