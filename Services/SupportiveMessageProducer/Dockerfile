@@ -3,12 +3,11 @@ FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 WORKDIR /app
 
 # Copy the csproj file and restore as distinct layers
-COPY SupportiveMessageProducer/SupportiveMessageProducer.csproj ./SupportiveMessageProducer/
-RUN dotnet restore ./SupportiveMessageProducer/SupportiveMessageProducer.csproj
+COPY ./*.csproj ./
+RUN dotnet restore ./*.csproj
 
 # Copy the entire project and build
-COPY SupportiveMessageProducer/ ./SupportiveMessageProducer/
-WORKDIR /app/SupportiveMessageProducer
+COPY . ./
 RUN dotnet publish -c Release -o /app/publish
 
 FROM mcr.microsoft.com/dotnet/runtime:8.0 AS runtime
