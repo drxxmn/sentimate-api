@@ -1,0 +1,22 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: supportive-message-consumer
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: supportive-message-consumer
+  template:
+    metadata:
+      labels:
+        app: supportive-message-consumer
+    spec:
+      containers:
+        - name: consumer
+          image: ghcr.io/drxxmn/supportive-message-consumer
+          env:
+            - name: RABBITMQ_HOST
+              value: "rabbitmq"
+            - name: ConnectionStrings__Database
+              value: "Host=postgresql;Database=messagesdb;Username=postgres;Password=password"

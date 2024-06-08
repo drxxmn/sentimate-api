@@ -1,0 +1,6 @@
+@SupportiveMessageProducer_HostAddress = http://localhost:5191
+
+GET {{SupportiveMessageProducer_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

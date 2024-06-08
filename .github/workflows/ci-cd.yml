@@ -1,43 +1,62 @@
-name: .NET CI/CD Pipeline
+name: CI
 
 on:
   push:
-    branches: [main]
-    paths:
-      - 'Services/MoodTrackerAPI/**'
-  pull_request:
-    branches: [main]
-    paths:
-      - 'Services/MoodTrackerAPI/**'
-
-  
-  workflow_dispatch:
-
-jobs:
-  build-and-push:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Check out code
-        uses: actions/checkout@v2
-
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v1
-
-      - name: Login to GitHub Container Registry
-        uses: docker/login-action@v1
-        with:
-          registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ secrets.GHCR_TOKEN }}
-
-      - name: Build and push Docker image
-        uses: docker/build-push-action@v2
-        with:
-          context: ./Services/MoodTrackerAPI
-          file: ./Services/MoodTrackerAPI/Dockerfile
-          tags: ghcr.io/drxxmn/sentimate-api:latest
-          push: true
+    branches: ['main']
 
 env:
   REGISTRY: ghcr.io
-  IMAGE_NAME: ${{ github.repository }}
+  IMAGE_NAME: ${{github.repository}}
+
+jobs:
+  build-and-push-images:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        include:
+          - dockerfile: ./Services/SupportiveMessageProducer/Dockerfile
+            image: ghcr.io/drxxmn/supportive-message-producer
+            working-directory: ./Services/SupportiveMessageProducer
+            service-name: SupportiveMessageProducer
+          - dockerfile: ./Services/SupportiveMessageConsumer/Dockerfile
+            image: ghcr.io/drxxmn/supportive-message-consumer
+            working-directory: ./Services/SupportiveMessageConsumer
+            service-name: SupportiveMessageConsumer
+          - dockerfile: ./Services/MoodTrackerAPI/Dockerfile
+            image: ghcr.io/drxxmn/sentimate-api
+            working-directory: ./Services/MoodTrackerAPI
+            service-name: MoodTrackerAPI
+
+    name: Build and push container ${{matrix.service-name}}
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract metadata (tags, labels) for Docker
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{matrix.image}}
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build and Push Docker Image
+        uses: docker/build-push-action@v5
+        with:
+          context: ${{matrix.working-directory}}
+          file: ${{matrix.dockerfile}}
+          push: true
+          tags: ${{steps.meta.outputs.tags}}
+          labels: ${{steps.meta.outputs.labels}}

@@ -1,0 +1,34 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: supportive-message-producer
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: supportive-message-producer
+  template:
+    metadata:
+      labels:
+        app: supportive-message-producer
+    spec:
+      containers:
+        - name: producer
+          image: ghcr.io/drxxmn/supportive-message-producer:latest
+          ports:
+            - containerPort: 80
+          env:
+            - name: RABBITMQ_HOST
+              value: "rabbitmq"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: supportive-message-producer
+spec:
+  type: ClusterIP
+  ports:
+    - port: 80
+      targetPort: 80
+  selector:
+    app: supportive-message-producer
