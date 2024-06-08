@@ -23,15 +23,15 @@ jobs:
         include:
           - dockerfile: ./services/MoodTrackerAPI/Dockerfile
             image: ghcr.io/drxxmn/sentimate-api
-            context: .
+            context: ./services/MoodTrackerAPI
             service-name: MoodTrackerAPI
           - dockerfile: ./services/SupportiveMessageProducer/Dockerfile
             image: ghcr.io/drxxmn/supportive-message-producer
-            context: .
+            context: ./services/SupportiveMessageProducer
             service-name: SupportiveMessageProducer
           - dockerfile: ./services/SupportiveMessageConsumer/Dockerfile
             image: ghcr.io/drxxmn/supportive-message-consumer
-            context: .
+            context: ./services/SupportiveMessageConsumer
             service-name: SupportiveMessageConsumer
 
     name: Build and push container ${{ matrix.service-name }}
