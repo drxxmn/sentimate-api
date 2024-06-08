@@ -4,11 +4,11 @@ on:
   push:
     branches: [main]
     paths:
-      - 'MoodTrackerAPI/**'
+      - 'Services/MoodTrackerAPI/**'
   pull_request:
     branches: [main]
     paths:
-      - 'MoodTrackerAPI/**'
+      - 'Services/MoodTrackerAPI/**'
 
   
   workflow_dispatch:
