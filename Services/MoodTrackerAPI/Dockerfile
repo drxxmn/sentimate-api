@@ -5,13 +5,13 @@ FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 WORKDIR /src
 
 # Copy the project file into the container at /src
-COPY ["MoodTrackerAPI.csproj", "./"]
+COPY ["Services/MoodTrackerAPI/MoodTrackerAPI.csproj", "./"]
 
 # Restore dependencies
 RUN dotnet restore "MoodTrackerAPI.csproj"
 
 # Copy the rest of your app's source code from your host to your image filesystem.
-COPY . .
+COPY Services/MoodTrackerAPI/. .
 
 # Build the application
 RUN dotnet build "MoodTrackerAPI.csproj" -c Release -o /app/build
