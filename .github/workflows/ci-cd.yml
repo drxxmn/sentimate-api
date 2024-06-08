@@ -1,19 +1,30 @@
-name: CI
+name: .NET CI/CD Pipeline
 
 on:
   push:
-    branches: ['master']
-
-env:
-  REGISTRY: ghcr.io
-  IMAGE_NAME: ${{github.repository}}
+    branches: [main]
+    paths:
+      - 'Services/MoodTrackerAPI/**'
+      - 'Services/SupportiveMessageProducer/**'
+      - 'Services/SupportiveMessageConsumer/**'
+  pull_request:
+    branches: [main]
+    paths:
+      - 'Services/MoodTrackerAPI/**'
+      - 'Services/SupportiveMessageProducer/**'
+      - 'Services/SupportiveMessageConsumer/**'
+  workflow_dispatch:
 
 jobs:
-  build-and-push-images:
+  build-and-push:
     runs-on: ubuntu-latest
     strategy:
       matrix:
         include:
+          - dockerfile: ./Services/MoodTrackerAPI/Dockerfile
+            image: ghcr.io/drxxmn/sentimate-api
+            working-directory: ./Services/MoodTrackerAPI
+            service-name: MoodTrackerAPI
           - dockerfile: ./Services/SupportiveMessageProducer/Dockerfile
             image: ghcr.io/drxxmn/supportive-message-producer
             working-directory: ./Services/SupportiveMessageProducer
@@ -22,41 +33,41 @@ jobs:
             image: ghcr.io/drxxmn/supportive-message-consumer
             working-directory: ./Services/SupportiveMessageConsumer
             service-name: SupportiveMessageConsumer
-          - dockerfile: ./Services/MoodTrackerAPI/Dockerfile
-            image: ghcr.io/drxxmn/sentimate-api
-            working-directory: ./Services/MoodTrackerAPI
-            service-name: MoodTrackerAPI
 
-    name: Build and push container ${{matrix.service-name}}
+    name: Build and push container ${{ matrix.service-name }}
     permissions:
       contents: read
       packages: write
 
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+      - name: Check out code
+        uses: actions/checkout@v2
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v1
 
       - name: Login to GitHub Container Registry
-        uses: docker/login-action@v3
+        uses: docker/login-action@v1
         with:
-          registry: ${{ env.REGISTRY }}
+          registry: ghcr.io
           username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
+          password: ${{ secrets.GHCR_TOKEN }}
 
       - name: Extract metadata (tags, labels) for Docker
         id: meta
         uses: docker/metadata-action@v5
         with:
-          images: ${{matrix.image}}
+          images: ${{ matrix.image }}
 
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
-
-      - name: Build and Push Docker Image
-        uses: docker/build-push-action@v5
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v2
         with:
-          context: ${{matrix.working-directory}}
-          file: ${{matrix.dockerfile}}
+          context: ${{ matrix.working-directory }}
+          file: ${{ matrix.dockerfile }}
           push: true
-          tags: ${{steps.meta.outputs.tags}}
-          labels: ${{steps.meta.outputs.labels}}
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}
