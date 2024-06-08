@@ -3,12 +3,12 @@ FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 WORKDIR /app
 
 # Copy the csproj file and restore as distinct layers
-COPY SupportiveMessageConsumer/*.csproj ./SupportiveMessageConsumer/
+COPY services/SupportiveMessageConsumer/*.csproj ./SupportiveMessageConsumer/
 RUN ls -la /app # Debugging: List files in /app after copying .csproj
 RUN dotnet restore ./SupportiveMessageConsumer/SupportiveMessageConsumer.csproj
 
 # Copy the entire project and build
-COPY SupportiveMessageConsumer/. ./SupportiveMessageConsumer/
+COPY services/SupportiveMessageConsumer/. ./SupportiveMessageConsumer/
 RUN ls -la /app/SupportiveMessageConsumer # Debugging: List files in /app/SupportiveMessageConsumer after copying project files
 WORKDIR /app/SupportiveMessageConsumer
 RUN dotnet publish -c Release -o /app/publish
