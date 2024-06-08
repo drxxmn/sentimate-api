@@ -5,11 +5,11 @@ FROM --platform=$BUILDPLATFORM mcr.microsoft.com/dotnet/sdk:8.0-alpine AS build
 WORKDIR /source
 
 # Copy the .csproj file and restore dependencies
-COPY SupportiveMessageConsumer/*.csproj ./
+COPY Services/SupportiveMessageConsumer/*.csproj ./
 RUN dotnet restore
 
 # Copy the entire source code into the container
-COPY SupportiveMessageConsumer/. .
+COPY Services/SupportiveMessageConsumer/. .
 
 # Argument for the target architecture
 ARG TARGETARCH
