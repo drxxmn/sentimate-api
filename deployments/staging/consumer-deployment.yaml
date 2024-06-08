@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
         - name: consumer
-          image: ghcr.io/drxxmn/supportive-message-consumer
+          image: ghcr.io/drxxmn/supportive-message-consumer:main
           env:
             - name: RABBITMQ_HOST
               value: "rabbitmq"

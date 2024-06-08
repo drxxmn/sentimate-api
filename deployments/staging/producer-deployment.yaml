@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
         - name: producer
-          image: ghcr.io/drxxmn/supportive-message-producer:latest
+          image: ghcr.io/drxxmn/supportive-message-producer:main
           ports:
             - containerPort: 80
           env:

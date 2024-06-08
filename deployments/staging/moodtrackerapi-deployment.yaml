@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
         - name: moodtrackerapi
-          image: ghcr.io/drxxmn/sentimate-api:latest
+          image: ghcr.io/drxxmn/sentimate-api:main
           env:
             - name: MongoDB__ConnectionString
               value: "mongodb://mongoadmin:secret@mongodb:27017/?authSource=admin"
