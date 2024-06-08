@@ -2,6 +2,7 @@
 using Microsoft.Extensions.DependencyInjection;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
+using SupportiveMessageConsumer.Data; // Import the correct namespace
 using System;
 using System.Text;
 

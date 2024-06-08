@@ -1,28 +1,17 @@
-# syntax=docker/dockerfile:1
-FROM --platform=$BUILDPLATFORM mcr.microsoft.com/dotnet/sdk:8.0-alpine AS build
+using Microsoft.EntityFrameworkCore;
 
-# Copy the entire source code into the container
-COPY . /source
+namespace SupportiveMessageConsumer.Data
+{
+    public class MessagesContext : DbContext
+    {
+        public MessagesContext(DbContextOptions<MessagesContext> options) : base(options) { }
 
-# Set the working directory
-WORKDIR /source/Services/SupportiveMessageConsumer
+        public DbSet<SupportiveMessage> SupportiveMessages { get; set; }
+    }
 
-# Argument for the target architecture
-ARG TARGETARCH
-
-# Restore dependencies and build the project
-RUN --mount=type=cache,id=nuget,target=/root/.nuget/packages \
-dotnet publish -a ${TARGETARCH/amd64/x64} --use-current-runtime --self-contained false -o /app
-
-# Final stage: use the .NET runtime image
-FROM mcr.microsoft.com/dotnet/runtime:8.0-alpine AS final
-WORKDIR /app
-
-# Copy the built application from the previous stage
-COPY --from=build /app .
-
-# Optionally set a user (uncomment and set appropriate user if needed)
-# USER $APP_UID
-
-# Set the entry point for the application
-    ENTRYPOINT ["dotnet", "SupportiveMessageConsumer.dll"]
+    public class SupportiveMessage
+    {
+        public int Id { get; set; }
+        public string Message { get; set; } = string.Empty; // Initialize as empty string
+    }
+}
