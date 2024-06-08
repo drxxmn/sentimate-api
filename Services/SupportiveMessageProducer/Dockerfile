@@ -1,17 +1,17 @@
-# Use the .NET SDK to build the application
-FROM mcr.microsoft.com/dotnet/sdk:8.0-alpine AS build
+# syntax=docker/dockerfile:1
+FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 WORKDIR /source
 
-# Copy the .csproj file and restore dependencies
-COPY *.csproj ./
+# Copy csproj and restore as distinct layers
+COPY *.csproj .
 RUN dotnet restore
 
-# Copy the remaining source code and build the project
-COPY . ./
+# Copy everything else and build
+COPY . .
 RUN dotnet publish -c Release -o /app
 
-# Use the .NET runtime to run the application
-FROM mcr.microsoft.com/dotnet/runtime:8.0-alpine AS runtime
+FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS runtime
 WORKDIR /app
-COPY --from=build /app ./
+COPY --from=build /app .
+
 ENTRYPOINT ["dotnet", "SupportiveMessageProducer.dll"]
