@@ -1,19 +1,21 @@
-FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS base
-WORKDIR /app
-EXPOSE 80
-
+# Use the .NET SDK image as a build environment
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 WORKDIR /src
-COPY ["SupportiveMessageProducer/SupportiveMessageProducer.csproj", "SupportiveMessageProducer/"]
-RUN dotnet restore "SupportiveMessageProducer/SupportiveMessageProducer.csproj"
-COPY . .
-WORKDIR "/src/SupportiveMessageProducer"
-RUN dotnet build "SupportiveMessageProducer.csproj" -c Release -o /app/build
 
-FROM build AS publish
-RUN dotnet publish "SupportiveMessageProducer.csproj" -c Release -o /app/publish
+# Copy the project file and restore dependencies
+COPY SupportiveMessageConsumer/SupportiveMessageConsumer.csproj SupportiveMessageConsumer/
+RUN dotnet restore SupportiveMessageConsumer/SupportiveMessageConsumer.csproj
 
-FROM base AS final
+# Copy the rest of the source code and build the application
+COPY SupportiveMessageConsumer/ SupportiveMessageConsumer/
+WORKDIR /src/SupportiveMessageConsumer
+RUN dotnet build SupportiveMessageConsumer.csproj -c Release -o /app/build
+
+# Publish the application
+RUN dotnet publish SupportiveMessageConsumer.csproj -c Release -o /app/publish
+
+# Use the ASP.NET Core runtime image
+FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS base
 WORKDIR /app
-COPY --from=publish /app/publish .
-ENTRYPOINT ["dotnet", "SupportiveMessageProducer.dll"]
+COPY --from=build /app/publish .
+ENTRYPOINT ["dotnet", "SupportiveMessageConsumer.dll"]
