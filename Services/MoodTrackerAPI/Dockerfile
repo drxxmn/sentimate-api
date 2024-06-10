@@ -1,24 +1,17 @@
-# Use the official image as a parent image
-FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
+FROM --platform=$BUILDPLATFORM mcr.microsoft.com/dotnet/sdk:8.0-alpine AS build
+COPY . /source
+WORKDIR /source
+ARG TARGETARCH
 
-# Set the working directory
-WORKDIR /src
+RUN --mount=type=cache,id=nuget,target=/root/.nuget/packages \
+    dotnet publish -a ${TARGETARCH/amd64/x64} --use-current-runtime --self-contained false -o /out
+FROM mcr.microsoft.com/dotnet/aspnet:8.0-alpine AS final
+LABEL org.opencontainers.image.source=https://github.com/TsvetislavRangelov/mesher
+LABEL org.opencontainers.image.description="Geometry Generator Service (Non-Sampled)"
+WORKDIR /out
 
-# Copy the project file into the container at /src
-COPY ["Services/MoodTrackerAPI/MoodTrackerAPI.csproj", "./"]
-
-# Restore dependencies
-RUN dotnet restore "MoodTrackerAPI.csproj"
-
-# Copy the rest of your app's source code from your host to your image filesystem.
-COPY Services/MoodTrackerAPI/. .
-
-# Build the application
-RUN dotnet build "MoodTrackerAPI.csproj" -c Release -o /app/build
-
-FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS base
-WORKDIR /app
-COPY --from=build /app/build .
+COPY --from=build /out .
+USER $APP_UID
 
 RUN export OTEL_SERVICE_NAME=geometrygeneratornonsampled && \
 export OTEL_RESOURCE_ATTRIBUTES="deployment.environment=dev,service.namespace=default,service.version=1,service.instance.id=1" && \
