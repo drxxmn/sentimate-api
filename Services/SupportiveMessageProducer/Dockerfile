@@ -1,22 +1,18 @@
 # syntax=docker/dockerfile:1
-FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
+FROM --platform=$BUILDPLATFORM mcr.microsoft.com/dotnet/sdk:8.0-alpine AS build
+
+COPY . /source
+
+WORKDIR /source
+
+ARG TARGETARCH
+RUN --mount=type=cache,id=nuget,target=/root/.nuget/packages \
+    dotnet publish -a ${TARGETARCH/amd64/x64} --use-current-runtime --self-contained false -o /app
+FROM mcr.microsoft.com/dotnet/aspnet:8.0-alpine AS final
 WORKDIR /app
 
-# Copy the csproj file and restore as distinct layers
-COPY Services/SupportiveMessageProducer/*.csproj ./SupportiveMessageProducer/
-RUN ls -la /app # Debugging: List files in /app after copying .csproj
-RUN dotnet restore ./SupportiveMessageProducer/SupportiveMessageProducer.csproj
+COPY --from=build /app .
 
-# Copy the entire project and build
-COPY Services/SupportiveMessageProducer/. ./SupportiveMessageProducer/
-RUN ls -la /app/SupportiveMessageProducer # Debugging: List files in /app/SupportiveMessageProducer after copying project files
-WORKDIR /app/SupportiveMessageProducer
-RUN dotnet publish -c Release -o /app/publish
-RUN ls -la /app/publish # Debugging: List files in /app/publish after publishing
-
-FROM mcr.microsoft.com/dotnet/runtime:8.0 AS runtime
-WORKDIR /app
-COPY --from=build /app/publish .
-RUN ls -la /app # Debugging: List files in /app after copying from build stage
+USER $APP_UID
 
 ENTRYPOINT ["dotnet", "SupportiveMessageProducer.dll"]
