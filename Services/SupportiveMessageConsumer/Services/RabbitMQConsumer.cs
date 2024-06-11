@@ -1,45 +1,57 @@
+using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
+using SupportiveMessageConsumer.Data;
 using System.Text;
 using System.Text.Json;
+using System.Threading;
+using System.Threading.Tasks;
 
-public class RabbitMQConsumer : BackgroundService
+namespace SupportiveMessageConsumer.Services
 {
-    private readonly string _hostName;
-    private readonly string _queueName;
-    private readonly IServiceScopeFactory _scopeFactory;
-
-    public RabbitMQConsumer(IConfiguration configuration, IServiceScopeFactory scopeFactory)
+    public class RabbitMQConsumer : BackgroundService
     {
-        _hostName = configuration["RabbitMQ:Host"];
-        _queueName = configuration["RabbitMQ:QueueName"];
-        _scopeFactory = scopeFactory;
-    }
+        private readonly string _hostName;
+        private readonly string _queueName;
+        private readonly IServiceScopeFactory _scopeFactory;
 
-    protected override Task ExecuteAsync(CancellationToken stoppingToken)
-    {
-        var factory = new ConnectionFactory() { HostName = _hostName };
-        var connection = factory.CreateConnection();
-        var channel = connection.CreateModel();
-        channel.QueueDeclare(queue: _queueName, durable: false, exclusive: false, autoDelete: false, arguments: null);
-
-        var consumer = new EventingBasicConsumer(channel);
-        consumer.Received += (model, ea) =>
+        public RabbitMQConsumer(IConfiguration configuration, IServiceScopeFactory scopeFactory)
         {
-            var body = ea.Body.ToArray();
-            var message = Encoding.UTF8.GetString(body);
-            var supportiveMessage = JsonSerializer.Deserialize<SupportiveMessage>(message);
+            _hostName = configuration["RabbitMQ:Host"] ?? throw new ArgumentNullException(nameof(configuration), "RabbitMQ host name is not configured");
+            _queueName = configuration["RabbitMQ:QueueName"] ?? throw new ArgumentNullException(nameof(configuration), "RabbitMQ queue name is not configured");
+            _scopeFactory = scopeFactory ?? throw new ArgumentNullException(nameof(scopeFactory));
+        }
 
-            using (var scope = _scopeFactory.CreateScope())
+        protected override Task ExecuteAsync(CancellationToken stoppingToken)
+        {
+            var factory = new ConnectionFactory() { HostName = _hostName };
+            var connection = factory.CreateConnection();
+            var channel = connection.CreateModel();
+            channel.QueueDeclare(queue: _queueName, durable: false, exclusive: false, autoDelete: false, arguments: null);
+
+            var consumer = new EventingBasicConsumer(channel);
+            consumer.Received += (model, ea) =>
             {
-                var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-                dbContext.SupportiveMessages.Add(supportiveMessage);
-                dbContext.SaveChanges();
-            }
-        };
+                var body = ea.Body.ToArray();
+                var message = Encoding.UTF8.GetString(body);
+                var supportiveMessage = JsonSerializer.Deserialize<SupportiveMessage>(message);
 
-        channel.BasicConsume(queue: _queueName, autoAck: true, consumer: consumer);
+                if (supportiveMessage != null)
+                {
+                    using (var scope = _scopeFactory.CreateScope())
+                    {
+                        var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+                        dbContext.SupportiveMessages.Add(supportiveMessage);
+                        dbContext.SaveChanges();
+                    }
+                }
+            };
 
-        return Task.CompletedTask;
+            channel.BasicConsume(queue: _queueName, autoAck: true, consumer: consumer);
+
+            return Task.CompletedTask;
+        }
     }
 }

@@ -2,6 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: supportive-message-consumer
+  namespace: default
 spec:
   replicas: 1
   selector:
@@ -13,10 +14,27 @@ spec:
         app: supportive-message-consumer
     spec:
       containers:
-        - name: consumer
+        - name: supportive-message-consumer
           image: ghcr.io/drxxmn/supportive-message-consumer:main
           env:
-            - name: RABBITMQ_HOST
-              value: "rabbitmq"
-            - name: ConnectionStrings__Database
-              value: "Host=postgresql;Database=messagesdb;Username=postgres;Password=password"
+            - name: ConnectionStrings__DefaultConnection
+              value: "Server=postgresql.default.svc.cluster.local;Database=messagesdb;User Id=postgres;Password=password;"
+            - name: RabbitMQ__Host
+              value: "rabbitmq.default.svc.cluster.local"
+            - name: RabbitMQ__QueueName
+              value: "supportive_messages"
+          ports:
+            - containerPort: 80
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: supportive-message-consumer
+  namespace: default
+spec:
+  type: ClusterIP
+  ports:
+    - port: 80
+      targetPort: 80
+  selector:
+    app: supportive-message-consumer

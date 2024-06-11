@@ -29,3 +29,4 @@ namespace SupportiveMessageProducer.Controllers
         public string Sender { get; set; }
         public DateTime Timestamp { get; set; } = DateTime.UtcNow;
     }
+}
