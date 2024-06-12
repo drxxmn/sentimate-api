@@ -23,9 +23,9 @@ spec:
             - name: RabbitMQ__Host
               value: "rabbitmq.default.svc.cluster.local"
             - name: RabbitMQ__Username
-              value: "user"  # Replace with RabbitMQ username
+              value: "myuser"
             - name: RabbitMQ__Password
-              value: "bitnami"  # Replace with RabbitMQ password
+              value: "mypassword"
             - name: RabbitMQ__QueueName
               value: "supportive_messages"
           ports:
