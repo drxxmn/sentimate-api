@@ -9,7 +9,7 @@ spec:
     - matches:
         - path:
             type: PathPrefix
-            value: /
+            value: /api
       backendRefs:
         - group: ""
           kind: Service
@@ -19,7 +19,7 @@ spec:
     - matches:
         - path:
             type: PathPrefix
-            value: /producer
+            value: /SupportiveMessage
       backendRefs:
         - group: ""
           kind: Service
