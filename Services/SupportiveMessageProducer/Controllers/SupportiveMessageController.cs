@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using RabbitMQ.Client;
 using System.Text;
+using Microsoft.Extensions.Logging;
 
 namespace SupportiveMessageProducer.Controllers
 {
@@ -9,15 +10,18 @@ namespace SupportiveMessageProducer.Controllers
     public class SupportiveMessageController : ControllerBase
     {
         private readonly RabbitMQPublisher _rabbitMQPublisher;
+        private readonly ILogger<SupportiveMessageController> _logger;
 
-        public SupportiveMessageController(RabbitMQPublisher rabbitMQPublisher)
+        public SupportiveMessageController(RabbitMQPublisher rabbitMQPublisher, ILogger<SupportiveMessageController> logger)
         {
             _rabbitMQPublisher = rabbitMQPublisher;
+            _logger = logger;
         }
 
         [HttpPost]
         public IActionResult SendSupportiveMessage([FromBody] SupportiveMessage message)
         {
+            _logger.LogInformation($"Received supportive message: {message.Content} from {message.Sender}");
             _rabbitMQPublisher.PublishMessage(message);
             return Ok("Message sent to queue");
         }

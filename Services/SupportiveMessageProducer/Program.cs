@@ -4,6 +4,7 @@ builder.Services.AddControllers();
 builder.Services.AddSingleton<RabbitMQPublisher>();
 
 var app = builder.Build();
+
 app.UseAuthorization();
 app.MapControllers();
 app.Run();
