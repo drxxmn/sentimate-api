@@ -19,6 +19,7 @@ namespace SupportiveMessageProducer.Controllers
         [HttpPost]
         public IActionResult SendSupportiveMessage([FromBody] SupportiveMessage message)
         {
+            _logger.LogInformation("Endpoint hit: /SupportiveMessage");
             _logger.LogInformation($"Received supportive message: {message.Content} from {message.Sender}");
             _rabbitMQPublisher.PublishMessage(message);
             return Ok("Message sent to queue");

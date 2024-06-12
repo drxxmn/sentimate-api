@@ -13,7 +13,7 @@ var app = builder.Build();
 app.Use(async (context, next) =>
 {
     var logger = context.RequestServices.GetRequiredService<ILogger<Program>>();
-    logger.LogInformation($"Request: {context.Request.Method} {context.Request.Path}");
+    logger.LogInformation($"Incoming request: {context.Request.Method} {context.Request.Path}");
     await next.Invoke();
 });
 
