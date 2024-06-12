@@ -24,6 +24,13 @@ namespace SupportiveMessageProducer.Controllers
             _rabbitMQPublisher.PublishMessage(message);
             return Ok("Message sent to queue");
         }
+
+        [HttpGet("test")]
+        public IActionResult Test()
+        {
+            _logger.LogInformation("Test endpoint hit");
+            return Ok("Test endpoint working");
+        }
     }
 
     public class SupportiveMessage
