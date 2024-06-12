@@ -24,17 +24,22 @@ public class RabbitMQPublisher
     {
         try
         {
+            _logger.LogInformation("Creating connection factory");
             var factory = new ConnectionFactory()
             {
                 HostName = _hostName,
                 UserName = _username,
                 Password = _password
             };
+            _logger.LogInformation("Creating connection");
             using var connection = factory.CreateConnection();
+            _logger.LogInformation("Creating channel");
             using var channel = connection.CreateModel();
+            _logger.LogInformation("Declaring queue");
             channel.QueueDeclare(queue: _queueName, durable: false, exclusive: false, autoDelete: false, arguments: null);
 
             var messageBody = Encoding.UTF8.GetBytes(JsonSerializer.Serialize(message));
+            _logger.LogInformation("Publishing message to queue");
             channel.BasicPublish(exchange: "", routingKey: _queueName, basicProperties: null, body: messageBody);
 
             _logger.LogInformation($"Message published to queue {_queueName}: {JsonSerializer.Serialize(message)}");

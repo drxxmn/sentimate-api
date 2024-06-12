@@ -1,6 +1,4 @@
 using Microsoft.AspNetCore.Mvc;
-using RabbitMQ.Client;
-using System.Text;
 using Microsoft.Extensions.Logging;
 
 namespace SupportiveMessageProducer.Controllers
