@@ -1,25 +1,32 @@
-[ApiController]
-[Route("[controller]")]
-public class SupportiveMessageController : ControllerBase
-{
-    private readonly RabbitMQPublisher _rabbitMQPublisher;
+using Microsoft.AspNetCore.Mvc;
+using RabbitMQ.Client;
+using System.Text;
 
-    public SupportiveMessageController(RabbitMQPublisher rabbitMQPublisher)
+namespace SupportiveMessageProducer.Controllers
+{
+    [ApiController]
+    [Route("[controller]")]
+    public class SupportiveMessageController : ControllerBase
     {
-        _rabbitMQPublisher = rabbitMQPublisher;
+        private readonly RabbitMQPublisher _rabbitMQPublisher;
+
+        public SupportiveMessageController(RabbitMQPublisher rabbitMQPublisher)
+        {
+            _rabbitMQPublisher = rabbitMQPublisher;
+        }
+
+        [HttpPost]
+        public IActionResult SendSupportiveMessage([FromBody] SupportiveMessage message)
+        {
+            _rabbitMQPublisher.PublishMessage(message);
+            return Ok("Message sent to queue");
+        }
     }
 
-    [HttpPost]
-    public IActionResult SendSupportiveMessage([FromBody] SupportiveMessage message)
+    public class SupportiveMessage
     {
-        _rabbitMQPublisher.PublishMessage(message);
-        return Ok("Message sent to queue");
+        public string Content { get; set; }
+        public string Sender { get; set; }
+        public DateTime Timestamp { get; set; } = DateTime.UtcNow;
     }
-}
-
-public class SupportiveMessage
-{
-    public string Content { get; set; }
-    public string Sender { get; set; }
-    public DateTime Timestamp { get; set; } = DateTime.UtcNow;
 }
