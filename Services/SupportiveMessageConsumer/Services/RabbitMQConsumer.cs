@@ -15,18 +15,27 @@ namespace SupportiveMessageConsumer.Services
     {
         private readonly string _hostName;
         private readonly string _queueName;
+        private readonly string _username;
+        private readonly string _password;
         private readonly IServiceScopeFactory _scopeFactory;
 
         public RabbitMQConsumer(IConfiguration configuration, IServiceScopeFactory scopeFactory)
         {
             _hostName = configuration["RabbitMQ:Host"] ?? throw new ArgumentNullException(nameof(configuration), "RabbitMQ host name is not configured");
             _queueName = configuration["RabbitMQ:QueueName"] ?? throw new ArgumentNullException(nameof(configuration), "RabbitMQ queue name is not configured");
+            _username = configuration["RabbitMQ:Username"] ?? throw new ArgumentNullException(nameof(configuration), "RabbitMQ username is not configured");
+            _password = configuration["RabbitMQ:Password"] ?? throw new ArgumentNullException(nameof(configuration), "RabbitMQ password is not configured");
             _scopeFactory = scopeFactory ?? throw new ArgumentNullException(nameof(scopeFactory));
         }
 
         protected override Task ExecuteAsync(CancellationToken stoppingToken)
         {
-            var factory = new ConnectionFactory() { HostName = _hostName };
+            var factory = new ConnectionFactory()
+            {
+                HostName = _hostName,
+                UserName = _username,
+                Password = _password
+            };
             var connection = factory.CreateConnection();
             var channel = connection.CreateModel();
             channel.QueueDeclare(queue: _queueName, durable: false, exclusive: false, autoDelete: false, arguments: null);

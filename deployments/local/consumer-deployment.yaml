@@ -16,15 +16,20 @@ spec:
       containers:
         - name: supportive-message-consumer
           image: ghcr.io/drxxmn/supportive-message-consumer:main
+          imagePullPolicy: Always
           env:
             - name: ConnectionStrings__DefaultConnection
               value: "Server=postgresql.default.svc.cluster.local;Database=messagesdb;User Id=postgres;Password=password;"
             - name: RabbitMQ__Host
               value: "rabbitmq.default.svc.cluster.local"
+            - name: RabbitMQ__Username
+              value: "user"  # Replace with RabbitMQ username
+            - name: RabbitMQ__Password
+              value: "bitnami"  # Replace with RabbitMQ password
             - name: RabbitMQ__QueueName
               value: "supportive_messages"
           ports:
-            - containerPort: 80
+            - containerPort: 8080
 ---
 apiVersion: v1
 kind: Service
@@ -34,7 +39,7 @@ metadata:
 spec:
   type: ClusterIP
   ports:
-    - port: 80
-      targetPort: 80
+    - port: 8080
+      targetPort: 8080
   selector:
     app: supportive-message-consumer
