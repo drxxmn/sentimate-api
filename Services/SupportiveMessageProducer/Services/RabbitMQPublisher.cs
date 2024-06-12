@@ -32,4 +32,16 @@ public class RabbitMQPublisher
             };
             using var connection = factory.CreateConnection();
             using var channel = connection.CreateModel();
-            channel.QueueDeclare(queue: _queueName, durable: false, exclusive
+            channel.QueueDeclare(queue: _queueName, durable: false, exclusive: false, autoDelete: false, arguments: null);
+
+            var messageBody = Encoding.UTF8.GetBytes(JsonSerializer.Serialize(message));
+            channel.BasicPublish(exchange: "", routingKey: _queueName, basicProperties: null, body: messageBody);
+
+            _logger.LogInformation($"Message published to queue {_queueName}: {JsonSerializer.Serialize(message)}");
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError($"Failed to publish message: {ex.Message}");
+        }
+    }
+}
