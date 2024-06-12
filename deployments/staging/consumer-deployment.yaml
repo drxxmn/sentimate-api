@@ -22,12 +22,12 @@ spec:
               value: "Server=postgresql.default.svc.cluster.local;Database=messagesdb;User Id=postgres;Password=password;"
             - name: RabbitMQ__Host
               value: "rabbitmq.default.svc.cluster.local"
+            - name: RabbitMQ__QueueName
+              value: "supportive_messages"
             - name: RabbitMQ__Username
               value: "myuser"
             - name: RabbitMQ__Password
               value: "mypassword"
-            - name: RabbitMQ__QueueName
-              value: "supportive_messages"
           ports:
             - containerPort: 8080
 ---
