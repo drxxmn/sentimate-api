@@ -1,18 +1,19 @@
 using Microsoft.AspNetCore.Builder;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
-using MongoDB.Driver;
 using SupportiveMessageConsumer.Data;
 using SupportiveMessageConsumer.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
-builder.Services.AddControllers();
 builder.Services.Configure<MongoDbSettings>(builder.Configuration.GetSection("ConnectionStrings"));
+builder.Services.Configure<RabbitMQSettings>(builder.Configuration.GetSection("RabbitMQ"));
 builder.Services.AddSingleton<MongoDbContext>();
 builder.Services.AddHostedService<RabbitMQConsumer>();
+builder.Services.AddControllers();
 
 var app = builder.Build();
 
@@ -24,10 +25,7 @@ if (app.Environment.IsDevelopment())
 
 app.UseRouting();
 
-app.UseEndpoints(endpoints =>
-{
-    endpoints.MapControllers();
-});
+app.MapControllers();
 
 TestDatabaseConnection(app);
 
