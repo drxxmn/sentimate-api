@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
         - name: supportive-message-service
-          image: ghcr.io/drxxmn/supportive-message-service:latest
+          image: ghcr.io/drxxmn/supportive-message-service:main
           ports:
             - containerPort: 8080
           env:
