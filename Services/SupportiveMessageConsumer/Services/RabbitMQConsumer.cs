@@ -43,8 +43,10 @@ namespace SupportiveMessageConsumer.Services
                 Password = _password
             };
 
-            using var connection = factory.CreateConnection();
-            using var channel = connection.CreateModel();
+            _logger.LogInformation($"Connecting to RabbitMQ at {_hostName} with user {_username}");
+            
+            var connection = factory.CreateConnection();
+            var channel = connection.CreateModel();
             channel.QueueDeclare(queue: _queueName, durable: false, exclusive: false, autoDelete: false, arguments: null);
 
             var consumer = new EventingBasicConsumer(channel);
@@ -59,6 +61,7 @@ namespace SupportiveMessageConsumer.Services
                     var supportiveMessage = JsonSerializer.Deserialize<SupportiveMessage>(message);
                     if (supportiveMessage != null)
                     {
+                        _logger.LogInformation("Deserialized message successfully");
                         SaveMessageToDatabase(supportiveMessage);
                     }
                     else
@@ -72,6 +75,7 @@ namespace SupportiveMessageConsumer.Services
                 }
             };
 
+            _logger.LogInformation("Starting to consume messages");
             channel.BasicConsume(queue: _queueName, autoAck: true, consumer: consumer);
 
             return Task.CompletedTask;
