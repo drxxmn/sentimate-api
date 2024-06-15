@@ -31,9 +31,9 @@ metadata:
   name: supportive-message-service
   namespace: default
 spec:
-  type: ClusterIP
-  ports:
-    - port: 8080
-      targetPort: 8080
   selector:
     app: supportive-message-service
+  ports:
+    - protocol: TCP
+      port: 8080
+      targetPort: 8080

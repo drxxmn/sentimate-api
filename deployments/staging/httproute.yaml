@@ -1,7 +1,8 @@
 apiVersion: gateway.networking.k8s.io/v1
 kind: HTTPRoute
 metadata:
-  name: moodtracker-route
+  name: supportive-message-route
+  namespace: default
 spec:
   parentRefs:
     - name: envoy-gateway
@@ -15,6 +16,7 @@ spec:
           kind: Service
           name: moodtrackerapi
           port: 80
+          weight: 1
     - matches:
         - path:
             type: PathPrefix
@@ -24,12 +26,24 @@ spec:
           kind: Service
           name: supportive-message-producer
           port: 8080
+          weight: 1
     - matches:
         - path:
             type: PathPrefix
-            value: /SupportiveMessageService
+            value: /consumer
+      backendRefs:
+        - group: ""
+          kind: Service
+          name: supportive-message-consumer
+          port: 8080
+          weight: 1
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /messageservice
       backendRefs:
         - group: ""
           kind: Service
           name: supportive-message-service
           port: 8080
+          weight: 1
