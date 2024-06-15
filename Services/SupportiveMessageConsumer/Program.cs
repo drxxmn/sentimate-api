@@ -1,4 +1,3 @@
-using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -9,13 +8,22 @@ using SupportiveMessageConsumer.Services;
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
-builder.Services.Configure<MongoDbSettings>(builder.Configuration.GetSection("ConnectionStrings"));
+builder.Services.Configure<MongoDbSettings>(builder.Configuration.GetSection("ConnectionStrings:MongoDbSettings"));
 builder.Services.Configure<RabbitMQSettings>(builder.Configuration.GetSection("RabbitMQ"));
 builder.Services.AddSingleton<MongoDbContext>();
 builder.Services.AddHostedService<RabbitMQConsumer>();
 builder.Services.AddControllers();
 
 var app = builder.Build();
+
+var mongoSettings = builder.Configuration.GetSection("ConnectionStrings:MongoDbSettings").Get<MongoDbSettings>();
+var rabbitSettings = builder.Configuration.GetSection("RabbitMQ").Get<RabbitMQSettings>();
+
+logger.LogInformation($"MongoDB Connection String: {mongoSettings.ConnectionString}");
+logger.LogInformation($"MongoDB Database Name: {mongoSettings.DatabaseName}");
+logger.LogInformation($"RabbitMQ Host: {rabbitSettings.Host}");
+logger.LogInformation($"RabbitMQ Queue: {rabbitSettings.QueueName}");
+
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
