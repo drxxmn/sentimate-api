@@ -31,47 +31,40 @@ namespace SupportiveMessageConsumer.Services
             _context = context;
         }
 
-        protected override async Task ExecuteAsync(CancellationToken stoppingToken)
+        protected override Task ExecuteAsync(CancellationToken stoppingToken)
         {
-            try
+            var factory = new ConnectionFactory()
             {
-                var factory = new ConnectionFactory()
-                {
-                    HostName = _hostName,
-                    UserName = _username,
-                    Password = _password
-                };
+                HostName = _hostName,
+                UserName = _username,
+                Password = _password
+            };
 
-                using var connection = factory.CreateConnection();
-                using var channel = connection.CreateModel();
-                channel.QueueDeclare(queue: _queueName, durable: false, exclusive: false, autoDelete: false, arguments: null);
+            using var connection = factory.CreateConnection();
+            using var channel = connection.CreateModel();
+            channel.QueueDeclare(queue: _queueName, durable: false, exclusive: false, autoDelete: false, arguments: null);
 
-                var consumer = new EventingBasicConsumer(channel);
-                consumer.Received += (model, ea) =>
-                {
-                    var body = ea.Body.ToArray();
-                    var message = Encoding.UTF8.GetString(body);
-                    _logger.LogInformation($"Message received: {message}");
-                    
-                    try
-                    {
-                        var supportiveMessage = JsonSerializer.Deserialize<SupportiveMessage>(message);
-                        SaveMessageToDatabase(supportiveMessage);
-                    }
-                    catch (JsonException ex)
-                    {
-                        _logger.LogError($"Failed to deserialize message: {ex.Message}");
-                    }
-                };
-
-                channel.BasicConsume(queue: _queueName, autoAck: true, consumer: consumer);
-
-                await Task.CompletedTask;
-            }
-            catch (Exception ex)
+            var consumer = new EventingBasicConsumer(channel);
+            consumer.Received += (model, ea) =>
             {
-                _logger.LogError($"Failed to start RabbitMQ consumer: {ex.Message}");
-            }
+                var body = ea.Body.ToArray();
+                var message = Encoding.UTF8.GetString(body);
+                _logger.LogInformation($"Message received: {message}");
+
+                try
+                {
+                    var supportiveMessage = JsonSerializer.Deserialize<SupportiveMessage>(message);
+                    SaveMessageToDatabase(supportiveMessage);
+                }
+                catch (JsonException ex)
+                {
+                    _logger.LogError($"Failed to deserialize message: {ex.Message}");
+                }
+            };
+
+            channel.BasicConsume(queue: _queueName, autoAck: true, consumer: consumer);
+
+            return Task.CompletedTask;
         }
 
         private void SaveMessageToDatabase(SupportiveMessage message)
