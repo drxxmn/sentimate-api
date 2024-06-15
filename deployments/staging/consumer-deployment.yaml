@@ -20,8 +20,10 @@ spec:
           ports:
             - containerPort: 8080
           env:
+            - name: ASPNETCORE_ENVIRONMENT
+              value: "Production"
             - name: ConnectionStrings__MongoDb
-              value: "mongodb://mongo-query-router-service:27017/supportivemessagesdb"
+              value: "mongodb://mongodb.default.svc.cluster.local:27017"
             - name: RabbitMQ__Host
               value: "rabbitmq.default.svc.cluster.local"
             - name: RabbitMQ__QueueName
