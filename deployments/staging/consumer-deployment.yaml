@@ -16,6 +16,7 @@ spec:
       containers:
         - name: supportive-message-consumer
           image: ghcr.io/drxxmn/supportive-message-consumer:main
+          imagePullPolicy: Always
           ports:
             - containerPort: 8080
           env:
