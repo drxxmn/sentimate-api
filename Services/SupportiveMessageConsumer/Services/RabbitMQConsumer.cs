@@ -94,6 +94,5 @@ namespace SupportiveMessageConsumer.Services
                 _logger.LogError($"Failed to save message to database: {ex.Message}");
             }
         }
-
     }
 }
