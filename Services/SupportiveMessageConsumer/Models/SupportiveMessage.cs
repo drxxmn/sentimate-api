@@ -8,10 +8,10 @@ namespace SupportiveMessageConsumer.Models
     {
         [BsonId]
         [BsonRepresentation(BsonType.ObjectId)]
-        public string Id { get; set; }
+        public string Id { get; set; } = null!;
 
         [BsonElement("Content")]
-        public string Content { get; set; }
+        public string Content { get; set; } = null!;
 
         [BsonElement("Timestamp")]
         public DateTime Timestamp { get; set; } = DateTime.UtcNow;

@@ -23,12 +23,12 @@ namespace SupportiveMessageConsumer.Services
 
         public RabbitMQConsumer(IConfiguration configuration, ILogger<RabbitMQConsumer> logger, MongoDbContext context)
         {
-            _hostName = configuration["RabbitMQ:Host"];
-            _queueName = configuration["RabbitMQ:QueueName"];
-            _username = configuration["RabbitMQ:Username"];
-            _password = configuration["RabbitMQ:Password"];
-            _logger = logger;
-            _context = context;
+            _hostName = configuration["RabbitMQ:Host"] ?? throw new ArgumentNullException(nameof(configuration));
+            _queueName = configuration["RabbitMQ:QueueName"] ?? throw new ArgumentNullException(nameof(configuration));
+            _username = configuration["RabbitMQ:Username"] ?? throw new ArgumentNullException(nameof(configuration));
+            _password = configuration["RabbitMQ:Password"] ?? throw new ArgumentNullException(nameof(configuration));
+            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+            _context = context ?? throw new ArgumentNullException(nameof(context));
         }
 
         protected override Task ExecuteAsync(CancellationToken stoppingToken)
@@ -51,7 +51,10 @@ namespace SupportiveMessageConsumer.Services
                 var body = ea.Body.ToArray();
                 var message = Encoding.UTF8.GetString(body);
                 var supportiveMessage = JsonSerializer.Deserialize<SupportiveMessage>(message);
-                SaveMessageToDatabase(supportiveMessage);
+                if (supportiveMessage != null)
+                {
+                    SaveMessageToDatabase(supportiveMessage);
+                }
             };
 
             channel.BasicConsume(queue: _queueName, autoAck: true, consumer: consumer);
