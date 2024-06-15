@@ -1,3 +1,4 @@
+using Microsoft.Extensions.Options;
 using MongoDB.Driver;
 using SupportiveMessageService.Models;
 
@@ -7,10 +8,10 @@ namespace SupportiveMessageService.Data
     {
         private readonly IMongoDatabase _database;
 
-        public MongoDbContext(IConfiguration configuration)
+        public MongoDbContext(IOptions<MongoDbSettings> settings)
         {
-            var client = new MongoClient(configuration.GetConnectionString("MongoDb"));
-            _database = client.GetDatabase("supportivemessagesdb");
+            var client = new MongoClient(settings.Value.ConnectionString);
+            _database = client.GetDatabase(settings.Value.DatabaseName);
         }
 
         public IMongoCollection<SupportiveMessage> SupportiveMessages => _database.GetCollection<SupportiveMessage>("SupportiveMessages");

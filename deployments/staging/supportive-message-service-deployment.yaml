@@ -20,8 +20,10 @@ spec:
           ports:
             - containerPort: 8080
           env:
-            - name: ConnectionStrings__MongoDb
-              value: "mongodb://mongo-query-router-service:27017/supportivemessagesdb"
+            - name: MongoDbSettings__ConnectionString
+              value: "mongodb://mongoadmin:secret@mongodb.default.svc.cluster.local:27017"
+            - name: MongoDbSettings__DatabaseName
+              value: "supportivemessagesdb"
 ---
 apiVersion: v1
 kind: Service

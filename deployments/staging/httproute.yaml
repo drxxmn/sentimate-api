@@ -39,7 +39,7 @@ spec:
     - matches:
         - path:
             type: PathPrefix
-            value: /messageservice
+            value: /SupportiveMessageService
       backendRefs:
         - group: ""
           kind: Service

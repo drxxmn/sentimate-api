@@ -2,8 +2,6 @@ using Microsoft.AspNetCore.Mvc;
 using MongoDB.Driver;
 using SupportiveMessageService.Data;
 using SupportiveMessageService.Models;
-using System;
-using System.Linq;
 
 namespace SupportiveMessageService.Controllers
 {
@@ -18,26 +16,18 @@ namespace SupportiveMessageService.Controllers
             _context = context;
         }
 
-        [HttpPost]
-        public IActionResult CreateSupportiveMessage([FromBody] SupportiveMessage message)
-        {
-            _context.SupportiveMessages.InsertOne(message);
-            return Ok("Message stored in the database.");
-        }
-
         [HttpGet("random")]
-        public IActionResult GetRandomMessage()
+        public async Task<IActionResult> GetRandomMessage()
         {
-            var count = _context.SupportiveMessages.CountDocuments(FilterDefinition<SupportiveMessage>.Empty);
+            var collection = _context.SupportiveMessages;
+            var count = await collection.CountDocumentsAsync(FilterDefinition<SupportiveMessage>.Empty);
             if (count == 0)
             {
-                return NotFound("No messages found.");
+                return NotFound("No supportive messages found.");
             }
-
-            var random = new Random();
-            var skip = random.Next((int)count);
-            var message = _context.SupportiveMessages.Find(FilterDefinition<SupportiveMessage>.Empty).Skip(skip).FirstOrDefault();
-            return Ok(message);
+            var randomIndex = new Random().Next(0, (int)count);
+            var randomMessage = await collection.Find(FilterDefinition<SupportiveMessage>.Empty).Skip(randomIndex).Limit(1).FirstOrDefaultAsync();
+            return Ok(randomMessage);
         }
     }
 }
