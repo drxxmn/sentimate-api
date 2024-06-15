@@ -85,6 +85,7 @@ namespace SupportiveMessageConsumer.Services
         {
             try
             {
+                _logger.LogInformation($"Saving message to database: {JsonSerializer.Serialize(message)}");
                 _context.SupportiveMessages.InsertOne(message);
                 _logger.LogInformation("Message saved to database");
             }
@@ -93,5 +94,6 @@ namespace SupportiveMessageConsumer.Services
                 _logger.LogError($"Failed to save message to database: {ex.Message}");
             }
         }
+
     }
 }
