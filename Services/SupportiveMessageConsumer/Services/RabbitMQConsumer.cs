@@ -44,7 +44,7 @@ namespace SupportiveMessageConsumer.Services
             };
 
             _logger.LogInformation($"Connecting to RabbitMQ at {_hostName} with user {_username}");
-            
+
             var connection = factory.CreateConnection();
             var channel = connection.CreateModel();
             channel.QueueDeclare(queue: _queueName, durable: false, exclusive: false, autoDelete: false, arguments: null);
