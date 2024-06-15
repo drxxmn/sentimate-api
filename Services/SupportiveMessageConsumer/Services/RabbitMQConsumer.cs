@@ -5,6 +5,7 @@ using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
 using SupportiveMessageConsumer.Data;
 using SupportiveMessageConsumer.Models;
+using System;
 using System.Text;
 using System.Text.Json;
 using System.Threading;
@@ -33,6 +34,8 @@ namespace SupportiveMessageConsumer.Services
 
         protected override Task ExecuteAsync(CancellationToken stoppingToken)
         {
+            _logger.LogInformation("RabbitMQ Consumer started");
+
             var factory = new ConnectionFactory()
             {
                 HostName = _hostName,
@@ -54,7 +57,14 @@ namespace SupportiveMessageConsumer.Services
                 try
                 {
                     var supportiveMessage = JsonSerializer.Deserialize<SupportiveMessage>(message);
-                    SaveMessageToDatabase(supportiveMessage);
+                    if (supportiveMessage != null)
+                    {
+                        SaveMessageToDatabase(supportiveMessage);
+                    }
+                    else
+                    {
+                        _logger.LogWarning("Received null message");
+                    }
                 }
                 catch (JsonException ex)
                 {
