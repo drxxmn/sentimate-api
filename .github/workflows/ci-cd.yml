@@ -26,6 +26,10 @@ jobs:
             image: ghcr.io/drxxmn/supportive-message-producer
             working-directory: ./Services/SupportiveMessageProducer
             service-name: SupportiveMessageProducer
+          - dockerfile: ./Services/SupportiveMessageService/Dockerfile
+            image: ghcr.io/drxxmn/supportive-message-service
+            working-directory: ./Services/SupportiveMessageService
+            service-name: SupportiveMessageService
 
     name: Build and push container ${{matrix.service-name}}
     permissions:

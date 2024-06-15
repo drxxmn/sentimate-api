@@ -19,6 +19,15 @@ spec:
           imagePullPolicy: Always
           ports:
             - containerPort: 8080
+          env:
+            - name: RabbitMQ__Host
+              value: "rabbitmq.default.svc.cluster.local"
+            - name: RabbitMQ__QueueName
+              value: "supportive_messages"
+            - name: RabbitMQ__Username
+              value: "myuser"
+            - name: RabbitMQ__Password
+              value: "mypassword"
 ---
 apiVersion: v1
 kind: Service

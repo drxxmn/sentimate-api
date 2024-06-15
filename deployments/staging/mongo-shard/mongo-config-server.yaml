@@ -1,0 +1,40 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mongo-config-server
+  labels:
+    app: mongo
+    component: config-server
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: mongo
+      component: config-server
+  template:
+    metadata:
+      labels:
+        app: mongo
+        component: config-server
+    spec:
+      containers:
+        - name: mongo
+          image: mongo:4.4
+          command: ["mongod", "--configsvr", "--replSet", "configReplSet", "--bind_ip_all"]
+          ports:
+            - containerPort: 27017
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: mongo-config-service
+  labels:
+    app: mongo
+    component: config-server
+spec:
+  ports:
+    - port: 27017
+  clusterIP: None
+  selector:
+    app: mongo
+    component: config-server

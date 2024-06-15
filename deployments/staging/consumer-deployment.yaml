@@ -16,10 +16,11 @@ spec:
       containers:
         - name: supportive-message-consumer
           image: ghcr.io/drxxmn/supportive-message-consumer:main
-          imagePullPolicy: Always
+          ports:
+            - containerPort: 8080
           env:
-            - name: ConnectionStrings__DefaultConnection
-              value: "Server=postgresql.default.svc.cluster.local;Database=messagesdb;User Id=postgres;Password=password;"
+            - name: ConnectionStrings__MongoDb
+              value: "mongodb://mongo-query-router-service:27017/supportivemessagesdb"
             - name: RabbitMQ__Host
               value: "rabbitmq.default.svc.cluster.local"
             - name: RabbitMQ__QueueName
@@ -28,8 +29,6 @@ spec:
               value: "myuser"
             - name: RabbitMQ__Password
               value: "mypassword"
-          ports:
-            - containerPort: 8080
 ---
 apiVersion: v1
 kind: Service

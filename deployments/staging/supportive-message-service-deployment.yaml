@@ -1,0 +1,36 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: supportive-message-service
+  namespace: default
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: supportive-message-service
+  template:
+    metadata:
+      labels:
+        app: supportive-message-service
+    spec:
+      containers:
+        - name: supportive-message-service
+          image: ghcr.io/drxxmn/supportive-message-service:latest
+          ports:
+            - containerPort: 8080
+          env:
+            - name: ConnectionStrings__MongoDb
+              value: "mongodb://mongo-query-router-service:27017/supportivemessagesdb"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: supportive-message-service
+  namespace: default
+spec:
+  type: ClusterIP
+  ports:
+    - port: 8080
+      targetPort: 8080
+  selector:
+    app: supportive-message-service
