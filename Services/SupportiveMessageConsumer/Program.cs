@@ -16,15 +16,6 @@ builder.Services.AddControllers();
 
 var app = builder.Build();
 
-var mongoSettings = builder.Configuration.GetSection("ConnectionStrings:MongoDbSettings").Get<MongoDbSettings>();
-var rabbitSettings = builder.Configuration.GetSection("RabbitMQ").Get<RabbitMQSettings>();
-
-logger.LogInformation($"MongoDB Connection String: {mongoSettings.ConnectionString}");
-logger.LogInformation($"MongoDB Database Name: {mongoSettings.DatabaseName}");
-logger.LogInformation($"RabbitMQ Host: {rabbitSettings.Host}");
-logger.LogInformation($"RabbitMQ Queue: {rabbitSettings.QueueName}");
-
-
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
