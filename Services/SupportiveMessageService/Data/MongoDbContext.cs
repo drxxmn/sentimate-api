@@ -14,6 +14,9 @@ namespace SupportiveMessageService.Data
             _database = client.GetDatabase(settings.Value.DatabaseName);
         }
 
-        public IMongoCollection<SupportiveMessage> SupportiveMessages => _database.GetCollection<SupportiveMessage>("SupportiveMessages");
+        public IMongoCollection<SupportiveMessage> SupportiveMessages
+        {
+            get { return _database.GetCollection<SupportiveMessage>("SupportiveMessages"); }
+        }
     }
 }
