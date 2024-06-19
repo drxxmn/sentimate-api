@@ -17,3 +17,4 @@ namespace MoodTrackingService.Data
         public IMongoCollection<MoodEntry> MoodEntries => _database.GetCollection<MoodEntry>("MoodEntries");
     }
 }
+

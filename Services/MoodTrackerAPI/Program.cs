@@ -1,7 +1,5 @@
-using Microsoft.AspNetCore.Builder;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Configuration;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
 using OpenTelemetry;
 using OpenTelemetry.Metrics;
 using OpenTelemetry.Trace;
@@ -17,7 +15,7 @@ builder.Services.AddScoped<MongoDbContext>(provider =>
     return new MongoDbContext(configuration);
 });
 
-// grafana
+// Grafana
 using var tracerProvider = Sdk.CreateTracerProviderBuilder()
     .UseGrafana()
     .Build();
@@ -31,7 +29,21 @@ using var loggerFactory = LoggerFactory.Create(builder =>
         logging.UseGrafana();
     });
 });
-// grafana end 
+// Grafana end 
+
+// Configure Auth0 authentication
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+    .AddJwtBearer(options =>
+    {
+        var auth0Settings = builder.Configuration.GetSection("Auth0");
+        options.Authority = $"https://{auth0Settings["Domain"]}";
+        options.Audience = auth0Settings["Audience"];
+        options.TokenValidationParameters = new TokenValidationParameters
+        {
+            ValidIssuer = $"https://{auth0Settings["Domain"]}",
+            ValidAudience = auth0Settings["Audience"]
+        };
+    });
 
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
@@ -55,6 +67,8 @@ else
 app.UseHttpsRedirection();
 app.UseStaticFiles();
 app.UseRouting();
+
+app.UseAuthentication(); // Add this line
 app.UseAuthorization();
 app.MapControllers();
 app.Run();

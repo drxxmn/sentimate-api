@@ -1,7 +1,7 @@
-namespace MoodTrackingService.DTOs;
-
-public class MoodEntryCreateDto
+namespace MoodTrackingService.DTOs
 {
-    public string Mood { get; set; }
-    public string UserId { get; set; }
+    public class MoodEntryCreateDto
+    {
+        public int Mood { get; set; }
+    }
 }

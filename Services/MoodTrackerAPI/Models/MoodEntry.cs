@@ -1,6 +1,5 @@
 using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
-using System.ComponentModel.DataAnnotations;
 
 namespace MoodTrackingService.Models
 {
@@ -9,14 +8,11 @@ namespace MoodTrackingService.Models
         [BsonId]
         [BsonRepresentation(BsonType.ObjectId)]
         public string Id { get; set; }
-
-        [BsonElement("mood"), Required]
-        public string Mood { get; set; }
-
-        [BsonElement("timestamp")]
-        public DateTime Timestamp { get; set; }
-
-        [BsonElement("userId"), Required]
+        
+        public int Mood { get; set; }
+        
         public string UserId { get; set; }
+        
+        public DateTime Timestamp { get; set; }
     }
 }

@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using MoodTrackingService.Data;
 using MoodTrackingService.Models;
@@ -5,6 +6,7 @@ using MoodTrackingService.DTOs;
 using MongoDB.Driver;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace MoodTrackingService.Controllers
@@ -21,6 +23,7 @@ namespace MoodTrackingService.Controllers
         }
 
         [HttpGet]
+        [Authorize]
         public async Task<ActionResult<IEnumerable<MoodEntryResponseDto>>> Get()
         {
             var entries = await _context.MoodEntries.Find(_ => true).ToListAsync();
@@ -35,6 +38,7 @@ namespace MoodTrackingService.Controllers
         }
 
         [HttpPost]
+        [Authorize]
         public async Task<IActionResult> Post([FromBody] MoodEntryCreateDto dto)
         {
             if (!ModelState.IsValid)
@@ -45,7 +49,7 @@ namespace MoodTrackingService.Controllers
             var entry = new MoodEntry
             {
                 Mood = dto.Mood,
-                UserId = dto.UserId,
+                UserId = User.Claims.FirstOrDefault(c => c.Type == "sub")?.Value,
                 Timestamp = DateTime.UtcNow
             };
 
@@ -60,8 +64,8 @@ namespace MoodTrackingService.Controllers
             return CreatedAtAction(nameof(Get), new { id = entry.Id }, responseDto);
         }
 
-        // New Delete method
         [HttpDelete("{id}")]
+        [Authorize]
         public async Task<IActionResult> Delete(string id)
         {
             var result = await _context.MoodEntries.DeleteOneAsync(entry => entry.Id == id);
