@@ -15,6 +15,17 @@ builder.Services.AddScoped<MongoDbContext>(provider =>
     return new MongoDbContext(configuration);
 });
 
+// Configure CORS
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowSpecificOrigin",
+        builder => builder
+            .WithOrigins("http://your-frontend-url.com") // Replace with your frontend URL
+            .AllowAnyHeader()
+            .AllowAnyMethod()
+            .AllowCredentials());
+});
+
 // Grafana
 using var tracerProvider = Sdk.CreateTracerProviderBuilder()
     .UseGrafana()
@@ -68,7 +79,9 @@ app.UseHttpsRedirection();
 app.UseStaticFiles();
 app.UseRouting();
 
-app.UseAuthentication(); // Add this line
+app.UseCors("AllowSpecificOrigin"); // Add this line to enable CORS
+
+app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
 app.Run();
