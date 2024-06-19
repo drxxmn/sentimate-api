@@ -23,7 +23,6 @@ namespace MoodTrackingService.Controllers
         }
 
         [HttpGet]
-        [Authorize]
         public async Task<ActionResult<IEnumerable<MoodEntryResponseDto>>> Get()
         {
             var entries = await _context.MoodEntries.Find(_ => true).ToListAsync();
@@ -38,7 +37,6 @@ namespace MoodTrackingService.Controllers
         }
 
         [HttpPost]
-        [Authorize]
         public async Task<IActionResult> Post([FromBody] MoodEntryCreateDto dto)
         {
             if (!ModelState.IsValid)
@@ -49,7 +47,7 @@ namespace MoodTrackingService.Controllers
             var entry = new MoodEntry
             {
                 Mood = dto.Mood,
-                UserId = User.Claims.FirstOrDefault(c => c.Type == "sub")?.Value,
+                UserId = dto.UserId,
                 Timestamp = DateTime.UtcNow
             };
 
@@ -61,11 +59,10 @@ namespace MoodTrackingService.Controllers
                 Timestamp = entry.Timestamp,
                 UserId = entry.UserId
             };
-            return CreatedAtAction(nameof(Get), new { id = entry.Id }, responseDto);
+            return CreatedAtAction(nameof(Get), new {id = entry.Id}, responseDto);
         }
 
         [HttpDelete("{id}")]
-        [Authorize]
         public async Task<IActionResult> Delete(string id)
         {
             var result = await _context.MoodEntries.DeleteOneAsync(entry => entry.Id == id);
