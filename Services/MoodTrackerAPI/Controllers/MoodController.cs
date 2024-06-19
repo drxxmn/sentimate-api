@@ -97,5 +97,4 @@ namespace MoodTrackingService.Controllers
             return NoContent();
         }
     }
-
 }
