@@ -7,6 +7,7 @@ using MongoDB.Driver;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Claims;
 using System.Threading.Tasks;
 
 namespace MoodTrackingService.Controllers
@@ -23,9 +24,16 @@ namespace MoodTrackingService.Controllers
         }
 
         [HttpGet]
+        [Authorize]
         public async Task<ActionResult<IEnumerable<MoodEntryResponseDto>>> Get()
         {
-            var entries = await _context.MoodEntries.Find(_ => true).ToListAsync();
+            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (string.IsNullOrEmpty(userId))
+            {
+                return Unauthorized();
+            }
+
+            var entries = await _context.MoodEntries.Find(entry => entry.UserId == userId).ToListAsync();
             var responseDtos = entries.ConvertAll(entry => new MoodEntryResponseDto
             {
                 Id = entry.Id,
@@ -37,6 +45,7 @@ namespace MoodTrackingService.Controllers
         }
 
         [HttpPost]
+        [Authorize]
         public async Task<IActionResult> Post([FromBody] MoodEntryCreateDto dto)
         {
             if (!ModelState.IsValid)
@@ -44,10 +53,16 @@ namespace MoodTrackingService.Controllers
                 return BadRequest(ModelState);
             }
 
+            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (string.IsNullOrEmpty(userId))
+            {
+                return Unauthorized();
+            }
+
             var entry = new MoodEntry
             {
                 Mood = dto.Mood,
-                UserId = dto.UserId,
+                UserId = userId,
                 Timestamp = DateTime.UtcNow
             };
 
@@ -59,18 +74,26 @@ namespace MoodTrackingService.Controllers
                 Timestamp = entry.Timestamp,
                 UserId = entry.UserId
             };
-            return CreatedAtAction(nameof(Get), new {id = entry.Id}, responseDto);
+            return CreatedAtAction(nameof(Get), new { id = entry.Id }, responseDto);
         }
 
         [HttpDelete("{id}")]
+        [Authorize]
         public async Task<IActionResult> Delete(string id)
         {
-            var result = await _context.MoodEntries.DeleteOneAsync(entry => entry.Id == id);
-            if (result.DeletedCount == 0)
+            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (string.IsNullOrEmpty(userId))
+            {
+                return Unauthorized();
+            }
+
+            var entry = await _context.MoodEntries.Find(entry => entry.Id == id && entry.UserId == userId).FirstOrDefaultAsync();
+            if (entry == null)
             {
                 return NotFound();
             }
 
+            await _context.MoodEntries.DeleteOneAsync(entry => entry.Id == id && entry.UserId == userId);
             return NoContent();
         }
     }
