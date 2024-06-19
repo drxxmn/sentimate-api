@@ -29,6 +29,7 @@ using var loggerFactory = LoggerFactory.Create(builder =>
         logging.UseGrafana();
     });
 });
+// Grafana end 
 
 // Configure Auth0 authentication
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
@@ -67,8 +68,7 @@ app.UseHttpsRedirection();
 app.UseStaticFiles();
 app.UseRouting();
 
-app.UseAuthentication(); // Ensure this line is present
+app.UseAuthentication(); // Add this line
 app.UseAuthorization();
-
 app.MapControllers();
 app.Run();

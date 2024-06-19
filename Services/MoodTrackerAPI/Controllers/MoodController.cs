@@ -27,8 +27,8 @@ namespace MoodTrackingService.Controllers
         [Authorize]
         public async Task<ActionResult<IEnumerable<MoodEntryResponseDto>>> Get()
         {
-            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            if (string.IsNullOrEmpty(userId))
+            var userId = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value;
+            if (userId == null)
             {
                 return Unauthorized();
             }
@@ -53,8 +53,8 @@ namespace MoodTrackingService.Controllers
                 return BadRequest(ModelState);
             }
 
-            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            if (string.IsNullOrEmpty(userId))
+            var userId = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value;
+            if (userId == null)
             {
                 return Unauthorized();
             }
@@ -81,19 +81,18 @@ namespace MoodTrackingService.Controllers
         [Authorize]
         public async Task<IActionResult> Delete(string id)
         {
-            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            if (string.IsNullOrEmpty(userId))
+            var userId = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value;
+            if (userId == null)
             {
                 return Unauthorized();
             }
 
-            var entry = await _context.MoodEntries.Find(entry => entry.Id == id && entry.UserId == userId).FirstOrDefaultAsync();
-            if (entry == null)
+            var result = await _context.MoodEntries.DeleteOneAsync(entry => entry.Id == id && entry.UserId == userId);
+            if (result.DeletedCount == 0)
             {
                 return NotFound();
             }
 
-            await _context.MoodEntries.DeleteOneAsync(entry => entry.Id == id && entry.UserId == userId);
             return NoContent();
         }
     }
