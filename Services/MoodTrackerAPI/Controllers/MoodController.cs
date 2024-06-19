@@ -1,14 +1,13 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.IdentityModel.Tokens;
+using System.IdentityModel.Tokens.Jwt;
+using System.Linq;
+using System.Threading.Tasks;
 using MoodTrackingService.Data;
 using MoodTrackingService.Models;
 using MoodTrackingService.DTOs;
 using MongoDB.Driver;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Security.Claims;
-using System.Threading.Tasks;
 
 namespace MoodTrackingService.Controllers
 {
@@ -23,11 +22,25 @@ namespace MoodTrackingService.Controllers
             _context = context;
         }
 
+        private string GetUserIdFromToken()
+        {
+            var authHeader = HttpContext.Request.Headers["Authorization"].ToString();
+            if (authHeader.StartsWith("Bearer "))
+            {
+                var token = authHeader.Substring("Bearer ".Length).Trim();
+                var handler = new JwtSecurityTokenHandler();
+                var jsonToken = handler.ReadToken(token) as JwtSecurityToken;
+                var userId = jsonToken?.Claims.First(claim => claim.Type == "sub")?.Value;
+                return userId;
+            }
+            return null;
+        }
+
         [HttpGet]
         [Authorize]
         public async Task<ActionResult<IEnumerable<MoodEntryResponseDto>>> Get()
         {
-            var userId = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value;
+            var userId = GetUserIdFromToken();
             if (userId == null)
             {
                 return Unauthorized();
@@ -53,7 +66,7 @@ namespace MoodTrackingService.Controllers
                 return BadRequest(ModelState);
             }
 
-            var userId = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value;
+            var userId = GetUserIdFromToken();
             if (userId == null)
             {
                 return Unauthorized();
@@ -81,10 +94,16 @@ namespace MoodTrackingService.Controllers
         [Authorize]
         public async Task<IActionResult> Delete(string id)
         {
-            var userId = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value;
+            var userId = GetUserIdFromToken();
             if (userId == null)
             {
                 return Unauthorized();
+            }
+
+            var entry = await _context.MoodEntries.Find(entry => entry.Id == id && entry.UserId == userId).FirstOrDefaultAsync();
+            if (entry == null)
+            {
+                return NotFound();
             }
 
             var result = await _context.MoodEntries.DeleteOneAsync(entry => entry.Id == id && entry.UserId == userId);
