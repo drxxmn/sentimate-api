@@ -8,6 +8,7 @@ using MoodTrackingService.Data;
 using MoodTrackingService.Models;
 using MoodTrackingService.DTOs;
 using MongoDB.Driver;
+using System;
 
 namespace MoodTrackingService.Controllers
 {
@@ -72,22 +73,38 @@ namespace MoodTrackingService.Controllers
                 return Unauthorized();
             }
 
-            var entry = new MoodEntry
-            {
-                Mood = dto.Mood,
-                UserId = userId,
-                Timestamp = DateTime.UtcNow
-            };
+            var userTimezoneOffset = HttpContext.Request.Headers["Timezone-Offset"]; // Expecting the offset in minutes as a header
 
-            await _context.MoodEntries.InsertOneAsync(entry);
-            var responseDto = new MoodEntryResponseDto
+            if (!int.TryParse(userTimezoneOffset, out int offsetMinutes))
             {
-                Id = entry.Id,
-                Mood = entry.Mood,
-                Timestamp = entry.Timestamp,
-                UserId = entry.UserId
-            };
-            return CreatedAtAction(nameof(Get), new { id = entry.Id }, responseDto);
+                return BadRequest("Invalid timezone offset.");
+            }
+
+            var currentDateTimeUtc = DateTime.UtcNow;
+            var userCurrentDateTime = currentDateTimeUtc.AddMinutes(offsetMinutes);
+            var userCurrentDate = userCurrentDateTime.Date;
+
+            var filter = Builders<MoodEntry>.Filter.Where(entry => entry.UserId == userId && entry.Timestamp >= userCurrentDate && entry.Timestamp < userCurrentDate.AddDays(1));
+            var existingEntry = await _context.MoodEntries.Find(filter).FirstOrDefaultAsync();
+
+            if (existingEntry != null)
+            {
+                var update = Builders<MoodEntry>.Update.Set(entry => entry.Mood, dto.Mood).Set(entry => entry.Timestamp, currentDateTimeUtc);
+                await _context.MoodEntries.UpdateOneAsync(filter, update);
+            }
+            else
+            {
+                var entry = new MoodEntry
+                {
+                    Mood = dto.Mood,
+                    UserId = userId,
+                    Timestamp = currentDateTimeUtc
+                };
+
+                await _context.MoodEntries.InsertOneAsync(entry);
+            }
+
+            return NoContent();
         }
 
         [HttpDelete("{id}")]
