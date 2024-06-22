@@ -1,0 +1,54 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: mongo-shard-service
+  labels:
+    app: mongo
+    component: shard-server
+spec:
+  ports:
+    - port: 27018
+  clusterIP: None
+  selector:
+    app: mongo
+    component: shard-server
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: mongo-shard-server
+spec:
+  serviceName: "mongo-shard-service"
+  replicas: 3
+  selector:
+    matchLabels:
+      app: mongo
+      component: shard-server
+  template:
+    metadata:
+      labels:
+        app: mongo
+        component: shard-server
+    spec:
+      containers:
+        - name: mongo
+          image: mongo:4.4.29
+          command:
+            - mongod
+            - "--shardsvr"
+            - "--replSet"
+            - "shardReplSet"
+            - "--bind_ip_all"
+          ports:
+            - containerPort: 27018
+          volumeMounts:
+            - name: mongo-shard-server-data
+              mountPath: /data/db
+  volumeClaimTemplates:
+    - metadata:
+        name: mongo-shard-server-data
+      spec:
+        accessModes: [ "ReadWriteOnce" ]
+        resources:
+          requests:
+            storage: 5Gi

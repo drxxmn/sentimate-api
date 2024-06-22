@@ -1,0 +1,39 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: supportive-message-service
+  namespace: default
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: supportive-message-service
+  template:
+    metadata:
+      labels:
+        app: supportive-message-service
+    spec:
+      containers:
+        - name: supportive-message-service
+          image: ghcr.io/drxxmn/supportive-message-service:main
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8080
+          env:
+            - name: MongoDbSettings__ConnectionString
+              value: "mongodb://mongoadmin:secret@mongodb.default.svc.cluster.local:27017"
+            - name: MongoDbSettings__DatabaseName
+              value: "supportivemessagesdb"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: supportive-message-service
+  namespace: default
+spec:
+  selector:
+    app: supportive-message-service
+  ports:
+    - protocol: TCP
+      port: 8080
+      targetPort: 8080

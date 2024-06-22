@@ -1,0 +1,47 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: supportive-message-consumer
+  namespace: default
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: supportive-message-consumer
+  template:
+    metadata:
+      labels:
+        app: supportive-message-consumer
+    spec:
+      containers:
+        - name: supportive-message-consumer
+          image: ghcr.io/drxxmn/supportive-message-consumer:main
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8080
+          env:
+            - name: ASPNETCORE_ENVIRONMENT
+              value: "Production"
+            - name: ConnectionStrings__MongoDb
+              value: "mongodb://mongodb.default.svc.cluster.local:27017"
+            - name: RabbitMQ__Host
+              value: "rabbitmq.default.svc.cluster.local"
+            - name: RabbitMQ__QueueName
+              value: "supportive_messages"
+            - name: RabbitMQ__Username
+              value: "myuser"
+            - name: RabbitMQ__Password
+              value: "mypassword"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: supportive-message-consumer
+  namespace: default
+spec:
+  type: ClusterIP
+  ports:
+    - port: 8080
+      targetPort: 8080
+  selector:
+    app: supportive-message-consumer

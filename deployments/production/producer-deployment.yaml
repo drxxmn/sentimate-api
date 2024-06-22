@@ -1,0 +1,43 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: supportive-message-producer
+  namespace: default
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: supportive-message-producer
+  template:
+    metadata:
+      labels:
+        app: supportive-message-producer
+    spec:
+      containers:
+        - name: supportive-message-producer
+          image: ghcr.io/drxxmn/supportive-message-producer:main
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8080
+          env:
+            - name: RabbitMQ__Host
+              value: "rabbitmq.default.svc.cluster.local"
+            - name: RabbitMQ__QueueName
+              value: "supportive_messages"
+            - name: RabbitMQ__Username
+              value: "myuser"
+            - name: RabbitMQ__Password
+              value: "mypassword"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: supportive-message-producer
+  namespace: default
+spec:
+  type: ClusterIP
+  ports:
+    - port: 8080
+      targetPort: 8080
+  selector:
+    app: supportive-message-producer
