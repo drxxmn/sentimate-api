@@ -25,12 +25,12 @@ metadata:
   namespace: default
 spec:
   parentRefs:
-    - name: envoy-gateway
+    - name: envoy-gateway 
   rules:
     - matches:
         - path:
             type: PathPrefix
-            value: /SupportiveMessage
+            value: /SupportiveMessage #service
       backendRefs:
         - group: ""
           kind: Service
