@@ -131,5 +131,26 @@ namespace MoodTrackingService.Controllers
 
             return NoContent();
         }
+
+        // New endpoint to delete all user-related data
+        [HttpDelete]
+        [Route("deleteAll")]
+        [Authorize]
+        public async Task<IActionResult> DeleteAllUserData()
+        {
+            var userId = GetUserIdFromToken();
+            if (userId == null)
+            {
+                return Unauthorized();
+            }
+
+            var result = await _context.MoodEntries.DeleteManyAsync(entry => entry.UserId == userId);
+            if (result.DeletedCount == 0)
+            {
+                return NotFound("No data found for the user.");
+            }
+
+            return NoContent();
+        }
     }
 }

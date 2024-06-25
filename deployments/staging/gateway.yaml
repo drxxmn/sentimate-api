@@ -5,7 +5,7 @@ metadata:
 spec:
   gatewayClassName: envoy-gateway
   listeners:
-    - name: httpsB
+    - name: https
       protocol: HTTPS
       port: 443
       tls:
@@ -14,13 +14,3 @@ spec:
             kind: Secret
             name: backend-cert
         mode: Terminate
-    - name: httpsF
-      protocol: HTTPS
-      port: 443
-      tls:
-        certificateRefs:
-          - group: ""
-            kind: Secret
-            name: frontend-cert
-        mode: Terminate
-    
